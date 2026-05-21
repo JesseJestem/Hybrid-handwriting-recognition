@@ -211,14 +211,14 @@ Example JSON file:
 
 - [x] Drawing canvas
 - [x] Character label selection
-- [x] Stroke coordinate collection
 - [x] PNG image export
-- [x] JSON stroke export
 - [x] FastAPI endpoint for saving samples
 - [x] Dataset folder structure
 
 ### In Progress
 
+- [ ] JSON stroke export
+- [ ] Stroke coordinate collection
 - [ ] Support for uppercase English letters
 - [ ] Support for lowercase English letters
 - [ ] Dataset collection workflow
@@ -261,7 +261,7 @@ Tasks:
 - [x] Create canvas interface
 - [x] Collect stroke points
 - [x] Save image data
-- [x] Save stroke data
+- [ ] Save stroke data
 - [ ] Improve UI
 - [ ] Add uppercase and lowercase label selector
 - [ ] Add sample counter
@@ -429,7 +429,8 @@ Response:
 {
   "status": "saved",
   "label": "A",
-  "points_count": 128
+  "points_count": 128,
+  "samples_count": "2"
 }
 ```
 
