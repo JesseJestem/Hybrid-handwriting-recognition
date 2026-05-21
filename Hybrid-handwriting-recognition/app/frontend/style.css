@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #f2f2f2;
+}
+
+.container {
+  width: 520px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+select,
+button {
+  padding: 8px 12px;
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+}
+
+#clearBtn {
+  background: #555;
+  color: white;
+}
+
+#saveBtn {
+  background: #b00020;
+  color: white;
+}
+
+canvas {
+  background: white;
+  border: 3px solid #b00020;
+  border-radius: 8px;
+  touch-action: none;
+}
+
+.info {
+  margin-top: 16px;
+  font-size: 16px;
+}
