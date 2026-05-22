@@ -1,0 +1,8 @@
+1. from root:
+python -m uvicorn app.backend.main:app --reload
+
+2. open index.html
+
+3. start drawing
+
+4. end: Ctrl + C in CMD window

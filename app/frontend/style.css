@@ -46,11 +46,14 @@ button {
   color: white;
 }
 
-canvas {
+#drawingCanvas {
+  width: 400px;
+  height: 400px;
   background: white;
   border: 3px solid #b00020;
   border-radius: 8px;
   touch-action: none;
+  cursor: crosshair;
 }
 
 .info {

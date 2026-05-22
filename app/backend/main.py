@@ -15,7 +15,7 @@ app = FastAPI()
 #allow to send request to backend
 app.add_middleware(
     CORSMiddleware,
-    allow_orrigins = ["*"], #allow all websites
+    allow_origins = ["*"], #allow all websites
     allow_credentials = True,
     allow_methods = ["*"],
     allow_headers = ["*"],
@@ -31,7 +31,9 @@ STROKE_DIR.mkdir(parents=True, exist_ok=True)
 class Point(BaseModel):
     x: float
     y: float
-    time: float | None = None
+    t: float
+    pressure: float
+    pen_down: bool
 
 #api reqest model
 class SampleRequest(BaseModel):
@@ -83,7 +85,7 @@ def save_sample(sample: SampleRequest):
         "image_path": str(image_path),
         "canvas_width": sample.canvas_width,
         "canvas_height": sample.canvas_height,
-        "strokes": sample.strokes,
+        "strokes": [point.model_dump() for point in sample.strokes], #save as dict
     }
 
     with open(stroke_path, "w", encoding="utf-8") as f:
@@ -99,5 +101,5 @@ def save_sample(sample: SampleRequest):
         "image_path": str(image_path),
         "stroke_path": str(stroke_path),
         "points_count": len(sample.strokes),
-        "samples_count": str(samples_count),
+        "samples_count": samples_count,
     }
