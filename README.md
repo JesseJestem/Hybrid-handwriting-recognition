@@ -38,7 +38,7 @@ This allows the model to learn not only the final shape of a character, but also
 
 ## Current Stage
 
-The project is currently in the data collection stage.
+The project is currently in first training dataset testing.
 
 The application allows the user to:
 
@@ -145,16 +145,16 @@ Example dataset structure:
 data/
 └── raw/
     ├── images/
-    │   ├── A/
-    │   ├── B/
-    │   ├── a/
-    │   └── b/
+    │   ├── upper_A/
+    │   ├── upper_B/
+    │   ├── lower_a/
+    │   └── lower_b/
     │
     └── strokes/
-        ├── A/
-        ├── B/
-        ├── a/
-        └── b/
+        ├── upper_A/
+        ├── upper_B/
+        ├── lower_a/
+        └── lower_b/
 ```
 
 Example JSON file:
@@ -224,12 +224,12 @@ Example JSON file:
 ### In Progress
 
 - [ ] Dataset preprocessing script
-
-### Planned
-
 - [ ] Image preprocessing
 - [ ] Stroke preprocessing
 - [ ] Dataset builder
+
+### Planned
+
 - [ ] CNN image model
 - [ ] Stroke-based sequence model
 - [ ] Hybrid model
@@ -265,7 +265,7 @@ Tasks:
 - [x] Save stroke data
 - [x] Improve UI
 - [x] Add uppercase and lowercase label selector
-- [ ] Add sample counter
+- [x] Add sample counter
 - [ ] Add dataset statistics
 
 ---
