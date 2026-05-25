@@ -162,6 +162,7 @@ Example JSON file:
 ```json
 {
   "label": "A",
+  "image_path": "C:\\Users....A_20260523_011849_558783.png",
   "canvas_width": 400,
   "canvas_height": 400,
   "strokes": [
@@ -214,14 +215,14 @@ Example JSON file:
 - [x] PNG image export
 - [x] FastAPI endpoint for saving samples
 - [x] Dataset folder structure
+- [x] JSON stroke export
+- [x] Stroke coordinate collection
+- [x] Support for uppercase English letters
+- [x] Support for lowercase English letters
+- [x] Dataset collection workflow
 
 ### In Progress
 
-- [ ] JSON stroke export
-- [ ] Stroke coordinate collection
-- [ ] Support for uppercase English letters
-- [ ] Support for lowercase English letters
-- [ ] Dataset collection workflow
 - [ ] Dataset preprocessing script
 
 ### Planned
@@ -261,9 +262,9 @@ Tasks:
 - [x] Create canvas interface
 - [x] Collect stroke points
 - [x] Save image data
-- [ ] Save stroke data
-- [ ] Improve UI
-- [ ] Add uppercase and lowercase label selector
+- [x] Save stroke data
+- [x] Improve UI
+- [x] Add uppercase and lowercase label selector
 - [ ] Add sample counter
 - [ ] Add dataset statistics
 
@@ -430,7 +431,8 @@ Response:
   "status": "saved",
   "label": "A",
   "points_count": 128,
-  "samples_count": "2"
+  "samples_count": "2",
+
 }
 ```
 
@@ -499,7 +501,7 @@ This project is designed to practice and demonstrate:
 Current status:
 
 ```text
-Data collection app in development
+Data collection in progress
 ```
 
 Next major step:
