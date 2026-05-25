@@ -266,7 +266,7 @@ Tasks:
 - [x] Improve UI
 - [x] Add uppercase and lowercase label selector
 - [x] Add sample counter
-- [ ] Add dataset statistics
+- [x] Add dataset statistics
 
 ---
 
