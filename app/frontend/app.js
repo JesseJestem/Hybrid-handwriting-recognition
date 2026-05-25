@@ -159,7 +159,7 @@ saveBtn.addEventListener("click", async() =>{ //async - await, waiting for backe
         }
 
         samplesCount.textContent = result.samples_count; //return samples count
-        statusText.textContent = `Saved ${result.label}, points: {result.points_count}, samples: {result.samples_count}`;
+        statusText.textContent = `Saved ${result.label}, points: ${result.points_count}, samples: ${result.samples_count}`;
 
         clearCanvas();
     }   catch(error) {

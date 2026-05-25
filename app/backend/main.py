@@ -54,9 +54,17 @@ def root():
 def save_sample(sample: SampleRequest):
     label = sample.label #create folder for every letter or symbhol
 
+    if label.isalpha() and len(label) == 1:
+        if label.isupper():
+            folder_label = f"upper_{label}" #saving upper root
+        else:
+            folder_label = f"lower_{label}" #saving lower root
+    else:
+        folder_label = label
+
     #create folders for every symhol
-    image_label_dir = IMAGE_DIR / label #data/raw/images/A
-    stroke_label_dir = STROKE_DIR / label #data/raw/strokes/A
+    image_label_dir = IMAGE_DIR / folder_label #data/raw/images/A
+    stroke_label_dir = STROKE_DIR / folder_label #data/raw/strokes/A
 
     image_label_dir.mkdir(parents=True, exist_ok=True)
     stroke_label_dir.mkdir(parents=True, exist_ok=True)
@@ -65,8 +73,8 @@ def save_sample(sample: SampleRequest):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
     #create name of files
-    image_filename = f"{label}_{timestamp}.png"
-    stroke_filename = f"{label}_{timestamp}.json"
+    image_filename = f"{folder_label}_{timestamp}.png"
+    stroke_filename = f"{folder_label}_{timestamp}.json"
 
     #create file path
     image_path = image_label_dir / image_filename
