@@ -235,6 +235,7 @@ Example JSON file:
 - [ ] Hybrid model
 - [ ] Model evaluation
 - [ ] Data augmentation
+- [ ] Data synthesis
 - [ ] Confusion matrix
 - [ ] Prediction API
 - [ ] Real-time character prediction
@@ -311,6 +312,7 @@ Tasks:
 - [ ] Evaluate accuracy
 - [ ] Analyze incorrect predictions
 - [ ] Try data augmentation
+- [ ] Try data synthesis
 - [ ] Compare three approaches:
   - image-only model
   - stroke-only model
