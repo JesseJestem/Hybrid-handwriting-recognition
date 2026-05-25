@@ -234,6 +234,7 @@ Example JSON file:
 - [ ] Stroke-based sequence model
 - [ ] Hybrid model
 - [ ] Model evaluation
+- [ ] Data augmentation
 - [ ] Confusion matrix
 - [ ] Prediction API
 - [ ] Real-time character prediction
@@ -309,6 +310,7 @@ Tasks:
 - [ ] Train classifier on uppercase and lowercase English letters
 - [ ] Evaluate accuracy
 - [ ] Analyze incorrect predictions
+- [ ] Try data augmentation
 - [ ] Compare three approaches:
   - image-only model
   - stroke-only model
