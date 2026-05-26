@@ -220,11 +220,11 @@ Example JSON file:
 - [x] Support for uppercase English letters
 - [x] Support for lowercase English letters
 - [x] Dataset collection workflow
+- [x] Image preprocessing
 
 ### In Progress
 
 - [ ] Dataset preprocessing script
-- [ ] Image preprocessing
 - [ ] Stroke preprocessing
 - [ ] Dataset builder
 
@@ -278,11 +278,11 @@ Goal: convert raw data into training-ready arrays.
 
 Tasks:
 
-- [ ] Load PNG images
-- [ ] Convert images to grayscale
-- [ ] Crop empty space
-- [ ] Resize images to 64x64
-- [ ] Normalize pixel values
+- [x] Load PNG images
+- [x] Convert images to grayscale
+- [x] Crop empty space
+- [x] Resize images to 64x64
+- [x] Normalize pixel values
 - [ ] Load JSON stroke data
 - [ ] Normalize coordinates
 - [ ] Normalize time values
