@@ -10,7 +10,7 @@ def check_dataset ():
     total_strokes = 0
     problems = []
 
-    #iterdir - take all objects from images and take only folders - is_dir and take only names - p.name,
+    #iterdir - take all objects from images, take only folders - is_dir, take only names - p.name,
     #create list of pathes - ["A","a","B"...]
     image_classes = sorted([p.name for p in IMAGE_DIR.iterdir() if p.is_dir()])
     stroke_classes = sorted([p.name for p in STROKE_DIR.iterdir() if p.is_dir()])
