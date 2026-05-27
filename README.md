@@ -38,7 +38,7 @@ This allows the model to learn not only the final shape of a character, but also
 
 ## Current Stage
 
-The project is currently in first training dataset testing.
+The project is currently in preparing dataset and pipeline building stage.
 
 The application allows the user to:
 
@@ -221,11 +221,11 @@ Example JSON file:
 - [x] Support for lowercase English letters
 - [x] Dataset collection workflow
 - [x] Image preprocessing
+- [x] Stroke preprocessing
+- [x] Dataset preprocessing script
 
 ### In Progress
 
-- [ ] Dataset preprocessing script
-- [ ] Stroke preprocessing
 - [ ] Dataset builder
 
 ### Planned
@@ -283,10 +283,11 @@ Tasks:
 - [x] Crop empty space
 - [x] Resize images to 64x64
 - [x] Normalize pixel values
-- [ ] Load JSON stroke data
-- [ ] Normalize coordinates
-- [ ] Normalize time values
-- [ ] Pad or resample stroke sequences
+- [x] Load JSON stroke data
+- [x] Normalize coordinates
+- [x] Normalize time values
+- [x] Pad or resample stroke sequences
+- [ ] Build dataset
 - [ ] Save processed dataset as `.npz`
 
 Expected output:
@@ -505,11 +506,11 @@ This project is designed to practice and demonstrate:
 Current status:
 
 ```text
-Data collection in progress
+Building dataset in progress
 ```
 
 Next major step:
 
 ```text
-Build dataset preprocessing pipeline
+Create first hybrid model
 ```
