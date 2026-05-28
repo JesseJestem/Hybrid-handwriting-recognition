@@ -47,7 +47,7 @@ def check_dataset ():
     #print file count for every classes of img and strk
     for class_name in image_classes:
         image_files = sorted((IMAGE_DIR / class_name).glob("*.png")) #search all png files
-        stroke_files = sorted((STROKE_DIR / class_name).glob("*.json")) #search all png filesss
+        stroke_files = sorted((STROKE_DIR / class_name).glob("*.json")) #search all png files
 
         total_images += len(image_files)
         total_strokes += len(stroke_files)
@@ -56,7 +56,7 @@ def check_dataset ():
 
         #append if some file missing
         if len(image_files) != len(stroke_files):
-            problems.append(f"{class_name}: image/stroke count missmatch")
+            problems.append(f"{class_name}: image/stroke count mismatch")
 
         #checking file content and append
         for stroke_file in stroke_files:
