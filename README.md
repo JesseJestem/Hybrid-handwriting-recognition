@@ -38,7 +38,7 @@ This allows the model to learn not only the final shape of a character, but also
 
 ## Current Stage
 
-The project is currently in preparing dataset and pipeline building stage.
+The project is currently in creating first hybrid moded stage.
 
 The application allows the user to:
 
@@ -223,16 +223,16 @@ Example JSON file:
 - [x] Image preprocessing
 - [x] Stroke preprocessing
 - [x] Dataset preprocessing script
+- [x] Dataset builder
 
 ### In Progress
 
-- [ ] Dataset builder
+- [ ] Hybrid model
+- [ ] CNN image model
+- [ ] Stroke-based sequence model
 
 ### Planned
 
-- [ ] CNN image model
-- [ ] Stroke-based sequence model
-- [ ] Hybrid model
 - [ ] Model evaluation
 - [ ] Data augmentation
 - [ ] Data synthesis
@@ -287,8 +287,8 @@ Tasks:
 - [x] Normalize coordinates
 - [x] Normalize time values
 - [x] Pad or resample stroke sequences
-- [ ] Build dataset
-- [ ] Save processed dataset as `.npz`
+- [x] Build dataset
+- [x] Save processed dataset as `.npz`
 
 Expected output:
 
@@ -506,11 +506,11 @@ This project is designed to practice and demonstrate:
 Current status:
 
 ```text
-Building dataset in progress
+Building first hybrid model in progress
 ```
 
 Next major step:
 
 ```text
-Create first hybrid model
+Create CNN image model and stroke-based sequence model
 ```
