@@ -227,7 +227,7 @@ Example JSON file:
 
 ### In Progress
 
-- [ ] Hybrid model
+- [x] Hybrid model
 - [ ] CNN image model
 - [ ] Stroke-based sequence model
 
@@ -306,9 +306,9 @@ Goal: train a hybrid neural network for individual character recognition.
 
 Tasks:
 
-- [ ] Build CNN branch for image input
-- [ ] Build LSTM / GRU branch for stroke input
-- [ ] Concatenate image and stroke features
+- [x] Build CNN branch for image input
+- [x] Build GRU branch for stroke input
+- [x] Concatenate image and stroke features
 - [ ] Train classifier on uppercase and lowercase English letters
 - [ ] Evaluate accuracy
 - [ ] Analyze incorrect predictions
@@ -506,7 +506,7 @@ This project is designed to practice and demonstrate:
 Current status:
 
 ```text
-Building first hybrid model in progress
+Training first hybrid model in progress
 ```
 
 Next major step:
