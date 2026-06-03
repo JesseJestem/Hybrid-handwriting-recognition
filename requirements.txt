@@ -6,4 +6,4 @@ pillow
 numpy
 tensorflow
 scikit-learn
-mathplotlib
+matplotlib
