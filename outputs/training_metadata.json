@@ -110,8 +110,8 @@
     "Y",
     "Z"
   ],
-  "test_loss": 2.6240928173065186,
-  "test_accuracy": 0.18717949092388153,
-  "batch_size": 16,
-  "epochs": 2
+  "test_loss": 0.33388659358024597,
+  "test_accuracy": 0.8769230842590332,
+  "batch_size": 32,
+  "epochs": 30
 }

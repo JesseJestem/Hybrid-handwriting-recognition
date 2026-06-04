@@ -23,8 +23,8 @@ CONFUSION_MATRIX_PATH = OUTPUT_DIR / "confusion_matrix.npy"
 HISTORY_PATH = OUTPUT_DIR / "training_history.png"
 
 RANDOM_STATE = 42 #makes train/val/test split reproducible
-BATCH_SIZE = 16
-EPOCHS = 2
+BATCH_SIZE = 32
+EPOCHS = 30
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
