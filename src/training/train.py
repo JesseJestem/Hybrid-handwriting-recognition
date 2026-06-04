@@ -23,8 +23,8 @@ CONFUSION_MATRIX_PATH = OUTPUT_DIR / "confusion_matrix.npy"
 HISTORY_PATH = OUTPUT_DIR / "training_history.png"
 
 RANDOM_STATE = 42 #makes train/val/test split reproducible
-BATCH_SIZE = 32
-EPOCHS = 30
+BATCH_SIZE = 16
+EPOCHS = 2
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
@@ -96,7 +96,7 @@ def train():
     X_images, X_strokes, y, class_names, display_labels = load_dataset()
 
     #output neuron num
-    num_classes = len(class_names)
+    num_class = len(class_names)
 
     #~~~~~~~~~~~~~~~~~
     #Tarin/temp - 70/30 - split
@@ -134,7 +134,7 @@ def train():
     print()
 
     model = build_hybrid_model(
-        num_classes=num_classes,
+        num_class=num_class,
         image_shape=X_images.shape[1:],
         stroke_shape=X_strokes.shape[1:],
     )
@@ -262,7 +262,7 @@ def train():
     training_metadata = {
         'model_path': str(MODEL_PATH),
         'dataset_path': str(DATASET_PATH),
-        'num_classes': int(num_classes),
+        'num_class': int(num_class),
         'class_names': class_names.tolist(),
         'display_labels': display_labels.tolist(),
         'test_loss': float(test_loss),
