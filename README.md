@@ -309,7 +309,7 @@ Tasks:
 - [x] Build CNN branch for image input
 - [x] Build GRU branch for stroke input
 - [x] Concatenate image and stroke features
-- [x] Train classifier on uppercase and lowercase English letters
+- [ ] Train classifier on uppercase and lowercase English letters
 - [ ] Evaluate accuracy
 - [ ] Analyze incorrect predictions
 - [ ] Try data augmentation
