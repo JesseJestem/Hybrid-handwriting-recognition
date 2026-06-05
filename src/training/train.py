@@ -24,7 +24,7 @@ HISTORY_PATH = OUTPUT_DIR / "training_history.png"
 
 RANDOM_STATE = 42 #makes train/val/test split reproducible
 BATCH_SIZE = 32
-EPOCHS = 30
+EPOCHS = 50
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
