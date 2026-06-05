@@ -24,7 +24,7 @@ HISTORY_PATH = OUTPUT_DIR / "training_history.png"
 
 RANDOM_STATE = 42 #makes train/val/test split reproducible
 BATCH_SIZE = 32
-EPOCHS = 50
+EPOCHS = 60
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
@@ -140,7 +140,7 @@ def train():
     )
 
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         metrics=["accuracy"],
     )
