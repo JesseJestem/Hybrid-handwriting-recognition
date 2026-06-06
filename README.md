@@ -224,10 +224,14 @@ Example JSON file:
 - [x] Stroke preprocessing
 - [x] Dataset preprocessing script
 - [x] Dataset builder
+- [x] Hybrid model
+- [x] Test run
 
 ### In Progress
 
-- [x] Hybrid model
+- [ ] Confusin matrix
+- [ ] Prediction tool
+- [ ] Collect more data
 - [ ] CNN image model
 - [ ] Stroke-based sequence model
 
@@ -309,8 +313,11 @@ Tasks:
 - [x] Build CNN branch for image input
 - [x] Build GRU branch for stroke input
 - [x] Concatenate image and stroke features
-- [ ] Train classifier on uppercase and lowercase English letters
-- [ ] Evaluate accuracy
+- [x] Train classifier on uppercase and lowercase English letters
+- [x] Evaluate accuracy
+- [ ] Add prediction in app
+- [ ] Collect more data
+- [ ] Confision matrix
 - [ ] Analyze incorrect predictions
 - [ ] Try data augmentation
 - [ ] Try data synthesis
