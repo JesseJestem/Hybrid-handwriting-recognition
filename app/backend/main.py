@@ -1,18 +1,18 @@
 from fastapi import FastAPI
-#for different servers
-from fastapi.middleware.cors import CORSMiddleware 
-# create model of request
-from pydantic import BaseModel 
-# convinient file pass
-from pathlib import Path
-# create unique name based on time
-from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware #for different servers
+from pydantic import BaseModel #create model of request
+from pathlib import Path #convinient file pass
+from datetime import datetime #create unique name based on time
 import base64
 import json
+import sys
 
 app = FastAPI()
 
-#allow to send request to backend
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Middleweare - allow to send request to backend
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins = ["*"], #allow all websites
@@ -21,6 +21,11 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
+#~~~~~~~~~~~~~~~~~~~~~~
+#Path creator
+#~~~~~~~~~~~~~~~~~~~~~~
+
+#Sample saving path
 BASE_DIR = Path(__file__).resolve().parents[2] #take absolute file path from 2 lvl above (project folder)
 IMAGE_DIR = BASE_DIR / "data" / "raw" / "images" #save images in data/raw/images/A/1image.png
 STROKE_DIR = BASE_DIR / "data" / "raw" / "strokes" #save strokes in data/raw/strokes/A/1stroke.png
@@ -28,6 +33,20 @@ STROKE_DIR = BASE_DIR / "data" / "raw" / "strokes" #save strokes in data/raw/str
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 STROKE_DIR.mkdir(parents=True, exist_ok=True)
 
+#import prediction function
+sys.path.append(str(BASE_DIR))
+from src.inference.predictor import predict_from_files
+
+#prediction path
+TEMP_DIR = BASE_DIR / "data" / "temp"
+#create temp
+TEMP_DIR.mkdir(parents=True, exist_ok=True)
+
+#~~~~~~~~~~~~~~~~~~~~~~
+#Classes
+#~~~~~~~~~~~~~~~~~~~~~~
+
+#stroke point model
 class Point(BaseModel):
     x: float
     y: float
@@ -35,7 +54,7 @@ class Point(BaseModel):
     pressure: float
     pen_down: bool
 
-#api reqest model
+#API reqest model
 class SampleRequest(BaseModel):
     label: str #letter,number,symbhol
     image: str #base64 image
@@ -43,12 +62,23 @@ class SampleRequest(BaseModel):
     canvas_width: int
     canvas_height: int
 
-#create test endpoint: if open http://localhost:8000/ "/" - def root will start and ansver with message
+#prediction model
+class PredictRequest(BaseModel):
+    image: str
+    strokes: list[Point]
+    canvas_width: int
+    canvas_height: int
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#API ENDPOINTS
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#Test GET endpoint: if open http://localhost:8000/ "/" - def root will start and ansver with message
 @app.get("/")
 def root():
     return{"message": "Hybrid Handwriting Data Collection API"}
 
-#create sample save endpoint
+#Sample save POST endpoint
 @app.post("/save-sample")
 #take JSON from request and check model SampleRequest after transform to python-object sample.
 def save_sample(sample: SampleRequest):
@@ -110,4 +140,45 @@ def save_sample(sample: SampleRequest):
         "stroke_path": str(stroke_path),
         "points_count": len(sample.strokes),
         "samples_count": samples_count,
+    }
+
+#Prediction POST endpoint
+@app.post("/predict")
+def prediction_sample(sample: PredictRequest):
+
+    #temp_files ID
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+
+    #temp path
+    image_path = TEMP_DIR / f"predict_{timestamp}.png"
+    stroke_path = TEMP_DIR / f"predict_{timestamp}.json"
+
+    #save temp img
+    image_data = sample.image.split(",")[1] #take only base64 part of request
+    image_bytes = base64.b64decode(image_data) #encode base 64
+    with open(image_path, "wb") as f:
+        f.write(image_bytes)
+
+    #save temp stroke
+    stroke_data = {
+        "label": None, #dont know label before predict
+        "image_path": str(image_path),
+        "canvas_width": sample.canvas_width,
+        "canvas_height": sample.canvas_height,
+        "strokes": [point.model_dump() for point in sample.strokes], #model_dump() - pydantic object to python
+    }
+    with open(stroke_path, "w", encoding="utf-8") as f:
+        json.dump(stroke_data, f, ensure_ascii=False, indent=2) #python to json ensure_ascii=False-not only Eng, indent=2-readeble formate
+    
+    #result saving
+    result = predict_from_files(
+        image_path=image_path,
+        stroke_path=stroke_path,
+        top_k=3,
+    )
+
+    return{
+        "prediction": result["prediction"],
+        "confidence": result["confidence"],
+        "top_3": result["top_k"],
     }
