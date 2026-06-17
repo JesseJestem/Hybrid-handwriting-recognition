@@ -1,4 +1,9 @@
 import argparse # allow run a file from the terminal with arguments (send path to img and stroke)
+from pathlib import Path
+import sys
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+sys.path.append(str(BASE_DIR))
 
 #import predictions def
 from src.inference.predictor import predict_from_files

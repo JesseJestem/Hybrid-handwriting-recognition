@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 
 def build_hybrid_model(
-        num_class: int, 
+        num_classes: int, 
         image_shape: tuple[int, int, int] = (64, 64, 1), 
         stroke_shape: tuple[int, int] = (100, 5)
         ) -> Model:
@@ -83,7 +83,7 @@ def build_hybrid_model(
     z = layers.Dropout(0.2)(z)
 
     #final result layer
-    output = layers.Dense(num_class, activation="linear", name="class_output",)(z)
+    output = layers.Dense(num_classes, activation="linear", name="class_output",)(z)
 
     #Sequential - for simple, Model - for difficult for Functional API - Model(inputs=..., outputs=...)
     model = Model(

@@ -10,12 +10,17 @@ const saveBtn = document.getElementById("saveBtn");
 const pointsCount = document.getElementById("pointsCount");
 const statusText = document.getElementById("statusText");
 const samplesCount = document.getElementById("samplesCount");
+const predictBtn = document.getElementById("predictBtn");
+const predictionText = document.getElementById("predictionText");
+const confidenceText = document.getElementById("confidenceText");
+const top3Text = document.getElementById("top3Text");
 
 // send data to postApi using IP of this PC (localhost)
 const API_URL = "http://127.0.0.1:8000/save-sample";
+const PREDICT_URL = "http://127.0.0.1:8000/predict";
 
 // let - changable variable, mark status
-let isDraving = false;
+let isDrawing = false;
 let strokes = [];
 let startTime = null;
 
@@ -81,7 +86,7 @@ function addPoint(event, isPenDown) {
 
 //wait for painting
 canvas.addEventListener("pointerdown", (event) => {
-    isDraving = true;
+    isDrawing = true;
     canvas.setPointerCapture(event.pointerId); //take pointer position
 
     const pos = getPointerPosition(event);
@@ -94,7 +99,7 @@ canvas.addEventListener("pointerdown", (event) => {
 
 //lisen to drawing
 canvas.addEventListener("pointermove", (event) => {
-    if(!isDraving) return; //take only drawing action, dont take just mouse moving
+    if(!isDrawing) return; //take only drawing action, dont take just mouse moving
 
     const pos = getPointerPosition(event);
 
@@ -106,15 +111,15 @@ canvas.addEventListener("pointermove", (event) => {
 
 //lisen when drawing is end
 canvas.addEventListener("pointerup", (event) => {
-    if(!isDraving) return;
+    if(!isDrawing) return;
 
-    isDraving = false;
+    isDrawing = false;
     addPoint(event, false); //add last point
 })
 
 //cancell collecting data if drawing was cancelled
 canvas.addEventListener("pointercancel", () => {
-    isDraving = false;
+    isDrawing = false;
 })
 
 //clear button
@@ -164,7 +169,73 @@ saveBtn.addEventListener("click", async() =>{ //async - await, waiting for backe
         clearCanvas();
     }   catch(error) {
         console.error(error);
-        statusText.textContent = 'Saved failed!!!';
+        statusText.textContent = 'Save failed!!!';
+    }
+});
+
+//predictions
+predictBtn.addEventListener("click", async (event) => { // async - for awaithing server response
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log("Predict clicked"); 
+
+    //check if we have smth to save
+    if (strokes.length === 0) {
+        statusText.textContent = "Nothing to predict";
+        return;
+    }
+
+    //take img from canvas and convert it to png base64
+    const image = canvas.toDataURL("image/png");
+
+    //create pakage to backend
+    const payload = {
+        image: image,
+        strokes: strokes,
+        canvas_width: canvas.width,
+        canvas_height: canvas.height
+    };
+
+    //try to send payload to backend usding API
+    try {
+        statusText.textContent = "Predicting~~~";
+
+        console.log("Before fetch");
+
+        const response = await fetch(PREDICT_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload) //transform from javascript to json string
+        });
+
+        console.log("Fetch status:", response.status);
+
+        //take json answer from server and transform to javascript
+        const result = await response.json();
+        
+        console.log("Prediction response:", result);
+        
+        //if error (not response ok) -> send error to catch
+        if (!response.ok) {
+            throw new Error(JSON.stringify(result));
+        }
+
+        //main prediction display from predictor.py via backend
+        predictionText.textContent = result.prediction;
+        confidenceText.textContent = `${(result.confidence * 100).toFixed(2)}%`; // transform 0.9245 -> 92%
+
+        top3Text.textContent = result.top_3
+            .map(item => `${item.label}: ${(item.confidence * 100).toFixed(1)}%`) //.map take evety element of list and transform it
+            .join(" | "); // add elements to one string with | division
+            //{ label: "b", confidence: 0.9245 },{ label: ... -> b: 92.5% | h: 5.2% | l: 1.3%
+        
+        statusText.textContent = "Prediction complete";
+    } catch (error) { //take error from throw
+        console.error(error); //send error to browser console for debugging
+        statusText.textContent = `Prediction failed: ${error.message}`;
     }
 });
 
@@ -182,4 +253,7 @@ function clearCanvas() {
     startTime = null;
     pointsCount.textContent = "0";
     statusText.textContent = "Ready";
+    predictionText.textContent = "-";
+    confidenceText.textContent = "-";
+    top3Text.textContent = "-";
 }
