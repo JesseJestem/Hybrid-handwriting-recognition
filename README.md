@@ -4,7 +4,7 @@
 
 This project is a handwriting recognition system for handwritten input from a mouse, touchpad, touchscreen, or stylus.
 
-The current goal is to build a data collection application for handwritten English letters. The collected data will later be used to train a hybrid neural network that combines image-based recognition and stroke-based recognition.
+The current MVP combines a data collection application with a trained hybrid neural network that uses image-based and stroke-based recognition.
 
 The first target is recognition of uppercase and lowercase English letters:
 
@@ -38,7 +38,7 @@ This allows the model to learn not only the final shape of a character, but also
 
 ## Current Stage
 
-The project is currently in creating first hybrid moded stage.
+The project is currently at the first working MVP stage.
 
 The application allows the user to:
 
@@ -46,7 +46,9 @@ The application allows the user to:
 - draw a handwritten character on a canvas
 - save the drawing as a PNG image
 - save stroke coordinates as JSON data
-- collect a custom dataset for future model training
+- collect and extend a custom dataset
+- predict a handwritten character with the trained hybrid model
+- display prediction confidence and Top-3 results
 
 ---
 
@@ -96,9 +98,9 @@ The hybrid model is expected to be stronger than using only images or only strok
 
 ---
 
-## Planned Model Architecture
+## Current Model Architecture
 
-The planned first model will classify individual English letters.
+The current model classifies individual English letters.
 
 ```text
 Input 1: 64x64 grayscale image
@@ -196,11 +198,11 @@ Example JSON file:
 - Uvicorn
 - Pydantic
 
-### Future Machine Learning Stack
+### Machine Learning Stack
 
 - TensorFlow / Keras
 - NumPy
-- OpenCV
+- Pillow
 - scikit-learn
 - Matplotlib
 
@@ -225,24 +227,30 @@ Example JSON file:
 - [x] Dataset preprocessing script
 - [x] Dataset builder
 - [x] Hybrid model
-- [x] Test run
+- [x] Model training and evaluation
+- [x] Classification report
+- [x] Confusion matrix
+- [x] Saved Keras model
+- [x] Command-line prediction tool
+- [x] FastAPI prediction endpoint
+- [x] Prediction from the browser interface
+- [x] Prediction confidence and Top-3 results
+- [x] Temporary prediction file cleanup
 
 ### In Progress
 
-- [ ] Confusin matrix
-- [ ] Prediction tool
-- [ ] Collect more data
+- [ ] Expand and balance the dataset
 - [ ] CNN image model
 - [ ] Stroke-based sequence model
+- [ ] Analyze incorrect predictions
+- [ ] Improve model evaluation on new handwriting sessions and writers
 
 ### Planned
 
-- [ ] Model evaluation
 - [ ] Data augmentation
 - [ ] Data synthesis
-- [ ] Confusion matrix
-- [ ] Prediction API
-- [ ] Real-time character prediction
+- [ ] Automated tests
+- [ ] Model and dataset versioning
 - [ ] Digits recognition
 - [ ] Symbol recognition
 - [ ] Other alphabets
@@ -315,9 +323,11 @@ Tasks:
 - [x] Concatenate image and stroke features
 - [x] Train classifier on uppercase and lowercase English letters
 - [x] Evaluate accuracy
-- [ ] Add prediction in app
+- [x] Add prediction in app
+- [x] Create prediction API
+- [x] Create confusion matrix
+- [x] Save classification report and training plots
 - [ ] Collect more data
-- [ ] Confision matrix
 - [ ] Analyze incorrect predictions
 - [ ] Try data augmentation
 - [ ] Try data synthesis
@@ -395,7 +405,7 @@ python -m uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
 The backend will run at:
 
 ```text
-http://0.0.0.0:8000
+http://127.0.0.1:8000
 ```
 
 ### 3. Start frontend
@@ -408,7 +418,32 @@ python -m http.server 5500 --bind 0.0.0.0
 The frontend will run at:
 
 ```text
-http://0.0.0.0:5500
+http://127.0.0.1:5500
+```
+
+Use the computer's local network IP instead of `127.0.0.1` to open the application from another device on the same network.
+
+### 4. Check and build the dataset
+
+```bash
+python src/training/check_raw_dataset.py
+python src/training/build_dataset.py
+```
+
+### 5. Train and evaluate the model
+
+```bash
+python src/training/train.py
+python src/evaluation/plot_confusion_matrix.py
+```
+
+### 6. Run prediction from browser
+
+```bash
+Open frontend in browser
+Write letter in canvas
+Press "Predict" button
+Check response stats under canvas
 ```
 
 ---
@@ -447,9 +482,58 @@ Response:
 {
   "status": "saved",
   "label": "A",
+  "image_path": "data/raw/images/upper_A/upper_A_timestamp.png",
+  "stroke_path": "data/raw/strokes/upper_A/upper_A_timestamp.json",
   "points_count": 128,
-  "samples_count": "2",
+  "samples_count": 100
+}
+```
 
+### Predict character
+
+```http
+POST /predict
+```
+
+Request body:
+
+```json
+{
+  "image": "base64_png_image",
+  "strokes": [
+    {
+      "x": 120,
+      "y": 300,
+      "t": 0,
+      "pressure": 0.5,
+      "pen_down": true
+    }
+  ],
+  "canvas_width": 400,
+  "canvas_height": 400
+}
+```
+
+Response:
+
+```json
+{
+  "prediction": "A",
+  "confidence": 0.96,
+  "top_3": [
+    {
+      "label": "A",
+      "confidence": 0.96
+    },
+    {
+      "label": "H",
+      "confidence": 0.02
+    },
+    {
+      "label": "R",
+      "confidence": 0.01
+    }
+  ]
 }
 ```
 
@@ -476,6 +560,20 @@ Better target:
 52 classes × 100 samples = 5,200 samples
 ```
 
+Current raw dataset:
+
+```text
+4,761 paired PNG + JSON samples
+Dataset expansion to at least 100 samples per class is in progress
+```
+
+Current processed dataset:
+
+```text
+2,600 samples
+52 classes x 50 samples
+```
+
 Future target:
 
 ```text
@@ -484,15 +582,17 @@ Future target:
 
 ---
 
-## Future Results Section
+## Results
 
-After training the first models, the results will be added here.
+The first hybrid model experiments were trained on the processed dataset with 2,600 samples.
 
 | Model | Accuracy | Notes |
 |---|---:|---|
 | CNN image-only | TBD | Baseline model |
 | Stroke-only LSTM / GRU | TBD | Sequence model |
-| Hybrid CNN + LSTM / GRU | TBD | Main model |
+| Hybrid CNN + GRU | 94.62% | Best current experiment, learning rate 0.0005 |
+
+The current result uses a random train/validation/test split. Future evaluation should also use separate handwriting sessions and data from different writers.
 
 ---
 
@@ -518,11 +618,11 @@ This project is designed to practice and demonstrate:
 Current status:
 
 ```text
-Training first hybrid model in progress
+Working MVP with data collection, preprocessing, training, evaluation, and prediction
 ```
 
 Next major step:
 
 ```text
-Create CNN image model and stroke-based sequence model
+Complete the balanced dataset, rebuild it, retrain the hybrid model, and compare it with image-only and stroke-only models
 ```

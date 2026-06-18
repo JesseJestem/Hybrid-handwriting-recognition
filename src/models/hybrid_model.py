@@ -98,5 +98,5 @@ def build_hybrid_model(
     return model
 
 if __name__ == "__main__":
-    model = build_hybrid_model(num_class=52)
+    model = build_hybrid_model(num_classes=52)
     model.summary()

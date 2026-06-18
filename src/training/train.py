@@ -134,7 +134,7 @@ def train():
     print()
 
     model = build_hybrid_model(
-        num_class=num_classes,
+        num_classes=num_classes,
         image_shape=X_images.shape[1:],
         stroke_shape=X_strokes.shape[1:],
     )
@@ -262,7 +262,7 @@ def train():
     training_metadata = {
         'model_path': str(MODEL_PATH),
         'dataset_path': str(DATASET_PATH),
-        'num_class': int(num_classes),
+        'num_classes': int(num_classes),
         'class_names': class_names.tolist(),
         'display_labels': display_labels.tolist(),
         'test_loss': float(test_loss),
