@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware #for different servers
 from pydantic import BaseModel #create model of request
 from pathlib import Path #convinient file pass
 from datetime import datetime #create unique name based on time
+from fastapi import HTTPException #send to frontend HTTP error answer
+import tempfile #temp files saving
+import traceback #display full error in backend console
 import base64
 import json
 import sys
@@ -37,8 +40,8 @@ STROKE_DIR.mkdir(parents=True, exist_ok=True)
 sys.path.append(str(BASE_DIR))
 from src.inference.predictor import predict_from_files
 
-#prediction path
-TEMP_DIR = BASE_DIR / "data" / "temp"
+#temp files for prediction (outside)
+TEMP_DIR = Path(tempfile.gettempdir()) / "hybrid_handwriting_temp"
 #create temp
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -154,31 +157,43 @@ def prediction_sample(sample: PredictRequest):
     stroke_path = TEMP_DIR / f"predict_{timestamp}.json"
 
     #save temp img
-    image_data = sample.image.split(",")[1] #take only base64 part of request
-    image_bytes = base64.b64decode(image_data) #encode base 64
-    with open(image_path, "wb") as f:
-        f.write(image_bytes)
+    try:
+        image_data = sample.image.split(",")[1] #take only base64 part of request
+        image_bytes = base64.b64decode(image_data) #encode base 64
+        with open(image_path, "wb") as f:
+            f.write(image_bytes)
 
-    #save temp stroke
-    stroke_data = {
-        "label": None, #dont know label before predict
-        "image_path": str(image_path),
-        "canvas_width": sample.canvas_width,
-        "canvas_height": sample.canvas_height,
-        "strokes": [point.model_dump() for point in sample.strokes], #model_dump() - pydantic object to python
-    }
-    with open(stroke_path, "w", encoding="utf-8") as f:
-        json.dump(stroke_data, f, ensure_ascii=False, indent=2) #python to json ensure_ascii=False-not only Eng, indent=2-readeble formate
+        #save temp stroke
+        stroke_data = {
+            "label": None, #dont know label before predict
+            "image_path": str(image_path),
+            "canvas_width": sample.canvas_width,
+            "canvas_height": sample.canvas_height,
+            "strokes": [point.model_dump() for point in sample.strokes], #model_dump() - pydantic object to python
+        }
+        with open(stroke_path, "w", encoding="utf-8") as f:
+            json.dump(stroke_data, f, ensure_ascii=False, indent=2) #python to json ensure_ascii=False-not only Eng, indent=2-readeble formate
+        
+        #result saving
+        result = predict_from_files(
+            image_path=image_path,
+            stroke_path=stroke_path,
+            top_k=3,
+        )
+
+        return{
+            "prediction": result["prediction"],
+            "confidence": result["confidence"],
+            "top_3": result["top_k"],
+        }
     
-    #result saving
-    result = predict_from_files(
-        image_path=image_path,
-        stroke_path=stroke_path,
-        top_k=3,
-    )
-
-    return{
-        "prediction": result["prediction"],
-        "confidence": result["confidence"],
-        "top_3": result["top_k"],
-    }
+    #display error on console logs
+    except Exception as e:
+        print("Prediction error:")
+        print(traceback.format_exc()) #full info
+        raise HTTPException(status_code=500, detail=str(e)) #500-server error to frontend + details in JSON- "detail": "Model not found: saved_models/hybrid_letters.keras"
+    
+    #delete temp files after prediction
+    finally:
+        image_path.unlink(missing_ok=True) #unlink- delete, missing ok- ok if deleted
+        stroke_path.unlink(missing_ok=True)
