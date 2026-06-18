@@ -11,3 +11,6 @@ __pycache__/
 .venv/
 venv/
 env/
+
+#temp files
+data/temp/
