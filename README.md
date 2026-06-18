@@ -389,21 +389,26 @@ pip install -r requirements.txt
 ### 2. Start backend
 
 ```bash
-python -m uvicorn app.backend.main:app --reload
+python -m uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The backend will run at:
 
 ```text
-http://127.0.0.1:8000
+http://0.0.0.0:8000
 ```
 
-### 3. Open frontend
+### 3. Start frontend
 
-Open this file in the browser:
+```bash
+cd app/frontend
+python -m http.server 5500 --bind 0.0.0.0
+```
+
+The frontend will run at:
 
 ```text
-app/frontend/index.html
+http://0.0.0.0:5500
 ```
 
 ---

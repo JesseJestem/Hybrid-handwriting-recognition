@@ -15,9 +15,11 @@ const predictionText = document.getElementById("predictionText");
 const confidenceText = document.getElementById("confidenceText");
 const top3Text = document.getElementById("top3Text");
 
-// send data to postApi using IP of this PC (localhost)
-const API_URL = "http://127.0.0.1:8000/save-sample";
-const PREDICT_URL = "http://127.0.0.1:8000/predict";
+// send data via API using IP of this PC (Wi-FI)
+const API_BASE = `http://${window.location.hostname}:8000`;
+
+const API_URL = `${API_BASE}/save-sample`;
+const PREDICT_URL = `${API_BASE}/predict`;
 
 // let - changable variable, mark status
 let isDrawing = false;
