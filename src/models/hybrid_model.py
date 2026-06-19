@@ -4,7 +4,7 @@ from tensorflow.keras import layers, Model
 def build_hybrid_model(
         num_classes: int, 
         image_shape: tuple[int, int, int] = (64, 64, 1), 
-        stroke_shape: tuple[int, int] = (100, 5)
+        stroke_shape: tuple[int, int] = (100, 6)
         ) -> Model:
     
     #~~~~~~~~~~~~~~~~~~
