@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 #~~~~~~~~~~~~~~~~~~
-#Read and open stroke file as python dict
+#Load stroke JSON -> dict
 #~~~~~~~~~~~~~~~~~~
 
 def load_stroke_json(stroke_path: str | Path) -> dict:
@@ -15,7 +15,7 @@ def load_stroke_json(stroke_path: str | Path) -> dict:
     return data
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Retutn normalized strokes in range 0-1 in formate [num_points, 6]
+#Normalized strokes in range 0-1 in formate [num_points, 6]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def normalize_strokes (data: dict) -> np.array:
@@ -32,25 +32,26 @@ def normalize_strokes (data: dict) -> np.array:
     pressure_values = np.array([p.get("pressure", 0.5) for p in strokes], dtype=np.float32)
     pen_down_values = np.array([1.0 if p.get("pen_down", True) else 0.0 for p in strokes], dtype=np.float32)
 
-    #add aditional stroke start feature
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #Add aditional stroke start feature
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     stroke_start_values = np.zeros_like(pen_down_values)
     previous_pen_down = 0.0
 
-    #separate each stroke by pen_down -> stroke_start
+    #separate each stroke by pen_down -> stroke_start pen_down:[1, 1, 1, 0, 1, 1] -> stroke_start:[1, 0, 0, 0, 1, 0]
     for i, pen_down in enumerate(pen_down_values):
         if pen_down == 1.0 and previous_pen_down == 0.0:
             stroke_start_values[i] = 1.0
         previous_pen_down = pen_down
 
-    #~~~~~~~~~~~~~~
-    #Normalize data
-    #~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~
+    #Normalize coordinate
+    #~~~~~~~~~~~~~~~~~~~~
 
-    #normalize coordinate
     #take borders of letter
     x_min, x_max = x_values.min(), x_values.max()
     y_min, y_max = y_values.min(), y_values.max()
-    t_min, t_max = t_values.min(), t_values.max()
 
     #take width, height, scale - proportion
     width = x_max - x_min
@@ -74,10 +75,14 @@ def normalize_strokes (data: dict) -> np.array:
         if height < scale:
             y_norm += (1.0 - height / scale) / 2.0
 
+    #cut over or under
     x_norm = np.clip(x_norm, 0.0, 1.0)
     y_norm = np.clip(y_norm, 0.0, 1.0)
 
-    #normalize time
+    #~~~~~~~~~~~~~~
+    #Normalize time
+    #~~~~~~~~~~~~~~
+
     t_min, t_max = t_values.min(), t_values.max()
 
     #transform time to 0-1 range
@@ -87,10 +92,16 @@ def normalize_strokes (data: dict) -> np.array:
     else:
         t_norm = (t_values - t_min) / (t_max - t_min)
 
-    #cut pressure to range 0-1
+    #~~~~~~~~~~~~~~
+    #Normalize pressure
+    #~~~~~~~~~~~~~~
+
     pressure_values = np.clip(pressure_values, 0.0, 1.0)
 
-    #collect all normalize features to np.array and return
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #Collect all normalize features to np.array and return
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     features = np.stack(
         [
             x_norm,
@@ -105,61 +116,307 @@ def normalize_strokes (data: dict) -> np.array:
 
     return features.astype(np.float32)
 
-#set stroke points fixed to 100 and return np.ndarray
-def resample_strokes(strokes: np.ndarray, max_points: int = 100) ->np.ndarray:
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Split sequence separate strokes
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def split_strokes(strokes: np.array) -> list[np.ndarray]:
+
+    segments = []
+    current_segment = []
+
+    #add point to segment and merge segments if not divided
+    #result = segments = [stroke_1,stroke_2,stroke_3]
+    for point in strokes:
+        pen_down = point[4] >=0.5
+
+        if pen_down:
+            current_segment.append(point)
+        else:
+            if len(current_segment) > 0:
+                segments.append(np.array(current_segment,dtype=np.float32))
+                current_segment = []
+    
+    if len(current_segment) > 0:
+        segments.append(np.array(current_segment, dtype=np.float32))
+
+    return segments
+
+#~~~~~~~~~~~~~~~~~~~~~~~~
+#Stroke length
+#~~~~~~~~~~~~~~~~~~~~~~~~
+
+#check lenght to set propotrion if every stroke in range 0~100
+def stroke_length(stroke: np.ndarray) -> float:
+
+    #if only one point = 1
+    if len(stroke) < 2:
+        return 1.0
+    
+    #calculate diffetent between points
+    dx = np.diff(stroke[:, 0])
+    dy = np.diff(stroke[:, 1])
+
+    #calculate distance between points
+    distances = np.sqrt(dx ** 2 + dy ** 2)
+    #calculate length of every stroke
+    length = float(np.sum(distances))
+
+    return max(length, 1e-6)
+
+#~~~~~~~~~~~~~~~~~~~
+#Resample one stroke
+#~~~~~~~~~~~~~~~~~~~
+
+def resample_single_stroke(stroke: np.ndarray, target_points: int) -> np.ndarray:
+
+    #--------------------
+    #if 0 target -> zeros
+    if target_points <= 0:
+        return np.zeros((0, 6), dtype=np.float32)
+    
+    #--------------------
+    #if stroke empty -> zeros
+    if len(stroke) == 0:
+        return np.zeros((target_points, 6), dtype=np.float32)
+    
+    #--------------------
+    #if one point -> repeat target_points times
+    if len(stroke) == 1:
+        repeated = np.repeat(stroke, target_points, axis=0)
+
+        repeated[:, 4] = 1.0 #pen_down
+        repeated[:, 5] = 0.0 #stroke_start
+        repeated[0, 5] = 1.0 #first point = start of stroke
+
+        return repeated.astype(np.float32)
+    
+    #--------------------
+    #calculate distance along the stroke for resampling
+    dx = np.diff(stroke[:, 0])
+    dy = np.diff(stroke[:, 1])
+
+    distances = np.sqrt(dx ** 2 + dy ** 2)
+    #add line based on sum of all distance from 0.0
+    #[0.2, 0.5, 0.3] -> [0.0, 0.2, 0.7, 1.0]
+    old_positions = np.concatenate([[0.0], np.cumsum(distances)])
+
+    total_length = old_positions[-1]
+
+    #--------------------
+    #if too small = one point -> repeat one point
+    if total_length < 1e-6:
+        repeated = np.repeat(stroke[:1], target_points, axis=0)
+
+        repeated[:, 4] = 1.0 #pen_down
+        repeated[:, 5] = 0.0 #stroke_start
+        repeated[0, 5] = 1.0 #first point = start of stroke
+
+        return repeated.astype(np.float32)
+
+    #--------------------
+    #remove duplicate distance position - one point
+    #same logic as only one point in stroke
+    unique_positions, unique_indicates = np.unique(old_positions, return_index=True)
+
+    if len(unique_indicates) < 2:
+        repeated = np.repeat(stroke, target_points, axis=0)
+
+        repeated[:, 4] = 1.0 #pen_down
+        repeated[:, 5] = 0.0 #stroke_start
+        repeated[0, 5] = 1.0 #first point = start of stroke
+
+        return repeated.astype(np.float32)
+
+    #~~~~~~~~~~~~~~~~~~~~
+    #Main Single Stroke Resample
+    #~~~~~~~~~~~~~~~~~~~~
+
+    #take clear stroke
+    unique_stroke = stroke[unique_indicates]
+
+    #create new smooth line based on unique pofitions
+    #[0.0, 1.0] target_points = 5 -> [0.0, 0.25, 0.5, 0.75, 1.0]
+    new_positions = np.linspace(0.0, unique_positions[-1], num=target_points)
+    #create empty result array
+    resampled = np.zeros((target_points, 6), dtype=np.float32)
+
+    #interpolate only x, y, t, pressure
+    #np.interp(x, xp, fp)
+
+    #x - where recive new position [0.0, 0.25, 0.5, 0.75, 1.0]
+    #xp - based on old positions where known points [0.0, 0.4, 1.0]
+    #fp - known points from ond positions [:, 0] = [10, 20, 50]
+    #resampled - [10.0, 16.25, 25.0, 37.5, 50.0]
+    for feature_index in range(4):
+        resampled[:, feature_index] = np.interp(
+            new_positions,
+            unique_positions,
+            unique_stroke[:, feature_index],
+        )
+    
+    #inside one stroke pen is down
+    resampled[:, 4] = 1.0
+
+    #only first point is stroke_start
+    resampled[:, 5] = 0.0
+    resampled[0, 5] = 1.0
+
+    return resampled.astype(np.float32)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Distribute points between strokes
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def distribute_points_between_strokes(
+        segments: list[np.array],
+        max_points: int,
+        separator_points_per_gap: int = 2,
+) -> tuple[np.ndarray, int]:
+    
+    #set all points(100) between each stroke with -2 points for gap
+    #100 opints, 3 stroke, 2 gaps, separator points = 2 gaps*2 =4
+    #result points = 100-4 = 96
+
+    num_segments = len(segments)
+
+    #if no segments, empty list + 0
+    if num_segments == 0:
+        return np.array([], dtype=np.int32), 0
+    
+    #if gaps = -1, take 0
+    gaps = max(num_segments -1, 0)
+    total_sep_points = gaps * separator_points_per_gap
+
+    drawing_points = max_points - total_sep_points
+
+    #if sepatarors take too much plase -> disable separators, take all points to stroke
+    if num_segments > drawing_points:
+        points_per_segment = np.zeros(num_segments, dtype=np.float32)
+        points_per_segment[:drawing_points] = 1
+        return points_per_segment, separator_points_per_gap
+    
+    #calculate lenght of every stroke
+    lengths = np.array(
+        [stroke_length(segment) for segment in segments],
+        dtype=np.float32,
+    )
+
+    #give atleast 1 point to stroke
+    points_per_segment = np.ones(num_segments, dtype=np.int32)
+
+    remaining_points = drawing_points - num_segments
+
+    #give remaining_points to all stroke by proportion
+    if remaining_points > 0:
+        #how many % of point to every stroke
+        weights = lengths / lengths.sum()
+
+        raw_extra_points = weights * remaining_points
+        extra_points = np.floor(raw_extra_points).astype(np.int32)
+
+        points_per_segment += extra_points
+
+        #floor can lose points, so give missing points to lagest fraction
+        missing_points = drawing_points - points_per_segment.sum()
+
+        fraction_parts = raw_extra_points - extra_points
+        order = np.argsort(fraction_parts)[::-1]
+
+        for i in order[:missing_points]:
+            points_per_segment[i] += 1
+        
+        return points_per_segment, separator_points_per_gap
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Resample all strokes
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def resample_strokes(strokes: np.ndarray, max_points: int = 100) -> np.ndarray:
+
+    #-------------------------
     #if no points return zeros (100, 6)
     if len(strokes) == 0:
         return np.zeros((max_points, 6), dtype=np.float32)
     
-    #if only 1 point return this point * 100 (100, 6)
-    if len(strokes) == 1:
-        repeated = np.repeat(strokes, max_points, axis=0)
-        return repeated.astype(np.float32)
+    segments = split_strokes(strokes)
+
+    #---------------------
+    #if aster segmentation = 0, return zeros
+    if len(segments) == 0:
+        return np.zeros((max_points, 6), dtype=np.float32)
     
+    #---------------------
+    #give points for every segment
+    points_per_segment, separator_points_per_gap = distribute_points_between_strokes(
+        segments=segments,
+        max_points=max_points,
+        separator_points_per_gap=2,
+    )
 
-    #interpolation - search unknown points from known to fill all 100 points
+    #------------------------
+    #temp storage of segments + aading resampled_segments to result
+    result_parts = []
 
-    #create old and new point position index (5, 1) -> (100, 1) in range 0-1, np.linspace - create smooth scale from 0 to 1
-    old_indices = np.linspace(0, 1, num=len(strokes))
-    new_indices = np.linspace(0, 1, num=max_points)
+    for segment_index, segment in enumerate(segments):
+        target_points = int(points_per_segment[segment_index])
+        if target_points <= 0:
+            continue
 
-    resampled_features = []
+        #resample for one stroke
+        resampled_segment = resample_single_stroke(
+            stroke=segment,
+            target_points=target_points,
+        )
 
-    #in range of features count (16, 6) (x,y,t,p,pen,start) take 6 features and interpolate old(16) to new(100) and create
-    #new list of features with 100 values
-    for feature_index in range(strokes.shape[1]):
-        feature_values = strokes[:, feature_index] #take all collum of every feature
-        resampled = np.interp(new_indices, old_indices, feature_values) # fill empty spase old16-new100 by features
-        resampled_features.append(resampled)
+        result_parts.append(resampled_segment)
 
-        #Example:
-        #old_indices = [0.0, 1.0]
-        #feature_values = [10, 20]
-        #new_indices = [0.0, 0.5, 1.0]
-        #np.interp = [10, 15, 20] because 15 in the middle 10-20
+        #----------------------
+        #checking if need to add separator points between strokes (but not last one and we have separators point)
+        if segment_index < len(segments) - 1 and separator_points_per_gap > 0:
+            current_end = resampled_segment[-1].copy()
+            next_start = segments[segment_index + 1][0].copy() #take first point of last segment
 
-    #collect all features back to formate (x,y,t,p,pen)
-    resampled_strokes = np.stack(resampled_features, axis=1)
+            #---------------------
+            #pen is up in the end of current segment, create separete point
+            current_end[4] = 0.0 #pen_down
+            current_end[5] = 0.0 #stroke_start
 
-    #return pen_down only to 1.0 or 0.0 formate (cancell interpolation) if 0.5 and more = 1.0 else 0.0
-    resampled_strokes[:, 4] = (resampled_strokes[:, 4] >= 0.5).astype(np.float32)
+            #-------------------
+            #move to start of next stroke while pen is up
+            next_start[4] = 0.0 #pen_down
+            next_start[5] = 0.0 #stroke_start
 
-    #rebuild stroke_start only to 1.0 or 0.0 formate (cancell interpolation) write 0.1 only if stroke started
-    resampled_strokes[:,5] = 0.0
-    previous_pen_down = 0.0
+            #append + reshape to merge same shapes arrays
+            result_parts.append(current_end.reshape(1, 6))
+            result_parts.append(next_start.reshape(1, 6))
+    
+    #if nothing - add 0
+    if len(result_parts) == 0:
+        return np.zeros((max_points, 6), dtype=np.float32)
+    
+    #----------------------
+    #merge all parts in result in order
+    result = np.concatenate(result_parts, axis=0)
 
-    for i in range(len(resampled_strokes)):
-        current_pen_down = resampled_strokes[i, 4]
-        if current_pen_down == 1.0 and previous_pen_down == 0.0:
-            resampled_strokes[i, 5] = 1.0
-        previous_pen_down = current_pen_down
+    #--------------------
+    #if too many points - cut
+    if len(result) > max_points:
+        result = result[:max_points]
 
-    #return new full (100, 6) formate stroke
-    return resampled_strokes.astype(np.float32)
+    #-----------------------
+    #if too few points - add padding with 0
+    if len(result) < max_points:
+        padding = np.zeros((max_points - len(result), 6), dtype=np.float32)
+        result = np.concatenate([result, padding], axis=0)
+    
+    return result.astype(np.float32)
 
-#main pipeline: json -> load data -> norm -> inetpolation -> complete
-def preprocess_strokes(stroke_path: str | Path, max_points: int = 100) ->np.ndarray:
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Main pipeline: json -> load data -> norm -> split by strokes -> resample -> complete
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def preprocess_strokes(stroke_path: str | Path, max_points: int = 100) -> np.ndarray:
 
     data = load_stroke_json(stroke_path)
     normalized = normalize_strokes(data)
@@ -167,12 +424,25 @@ def preprocess_strokes(stroke_path: str | Path, max_points: int = 100) ->np.ndar
 
     return resampled
 
-#test code
+#~~~~~~~~~
+#Test code
+#~~~~~~~~~
+
 if __name__ == "__main__":
     test_path = Path("data/raw/strokes/upper_A")
+
     if test_path.exists():
-        first_json = next(test_path.glob("*.json"))
-        processed = preprocess_strokes(first_json)
-        print("Processed strokes shape:", processed.shape)
-        print("Min:", processed.min())
-        print("Max:", processed.max())
+        json_files = list(test_path.glob("*.json"))
+
+        if len(json_files) == 0:
+            print("No JSON files found in:", test_path)
+        else:
+            first_json = json_files[0]
+            processed = preprocess_strokes(first_json)
+
+            print("File:", first_json)
+            print("Processed strokes shape:", processed.shape)
+            print("Min:", processed.min())
+            print("Max:", processed.max())
+            print("Pen down points:", processed[:, 4].sum())
+            print("Stroke starts:", processed[:, 5].sum())
