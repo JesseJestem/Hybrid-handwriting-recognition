@@ -2,7 +2,10 @@ from pathlib import Path
 import json
 import numpy as np
 
-#open stroke file as python dict
+#~~~~~~~~~~~~~~~~~~
+#Read and open stroke file as python dict
+#~~~~~~~~~~~~~~~~~~
+
 def load_stroke_json(stroke_path: str | Path) -> dict:
     stroke_path = Path(stroke_path)
 
@@ -11,23 +14,37 @@ def load_stroke_json(stroke_path: str | Path) -> dict:
 
     return data
 
-#retutn normalized strokes in range 0-1 in formate [num_points, 5]
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Retutn normalized strokes in range 0-1 in formate [num_points, 6]
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 def normalize_strokes (data: dict) -> np.array:
 
     strokes = data.get("strokes", []) #if not - empty list
     
     if len(strokes) == 0:
-        return np.zeros((0, 5), dtype=np.float32) #emtpy list - zeros
+        return np.zeros((0, 6), dtype=np.float32) #emtpy list - zeros
     
     #take stroke data and convert it into np.array
     x_values = np.array([p["x"] for p in strokes], dtype=np.float32)
     y_values = np.array([p["y"] for p in strokes], dtype=np.float32)
     t_values = np.array([p["t"] for p in strokes], dtype=np.float32)
-
     pressure_values = np.array([p.get("pressure", 0.5) for p in strokes], dtype=np.float32)
     pen_down_values = np.array([1.0 if p.get("pen_down", True) else 0.0 for p in strokes], dtype=np.float32)
 
-    #normalize data
+    #add aditional stroke start feature
+    stroke_start_values = np.zeros_like(pen_down_values)
+    previous_pen_down = 0.0
+
+    #separate each stroke by pen_down -> stroke_start
+    for i, pen_down in enumerate(pen_down_values):
+        if pen_down == 1.0 and previous_pen_down == 0.0:
+            stroke_start_values[i] = 1.0
+        previous_pen_down = pen_down
+
+    #~~~~~~~~~~~~~~
+    #Normalize data
+    #~~~~~~~~~~~~~~
 
     #normalize coordinate
     #take borders of letter
@@ -81,6 +98,7 @@ def normalize_strokes (data: dict) -> np.array:
             t_norm,
             pressure_values,
             pen_down_values,
+            stroke_start_values,
         ],
         axis=1
     )
@@ -90,11 +108,11 @@ def normalize_strokes (data: dict) -> np.array:
 #set stroke points fixed to 100 and return np.ndarray
 def resample_strokes(strokes: np.ndarray, max_points: int = 100) ->np.ndarray:
 
-    #if no points return zeros (100, 5)
+    #if no points return zeros (100, 6)
     if len(strokes) == 0:
-        return np.zeros((max_points, 5), dtype=np.float32)
+        return np.zeros((max_points, 6), dtype=np.float32)
     
-    #if only 1 point return this point * 100 (100, 5)
+    #if only 1 point return this point * 100 (100, 6)
     if len(strokes) == 1:
         repeated = np.repeat(strokes, max_points, axis=0)
         return repeated.astype(np.float32)
@@ -108,7 +126,7 @@ def resample_strokes(strokes: np.ndarray, max_points: int = 100) ->np.ndarray:
 
     resampled_features = []
 
-    #in range of features count (16, 5) (x,y,t,p,pen) take 5 features and interpolate old(16) to new(100) and create
+    #in range of features count (16, 6) (x,y,t,p,pen,start) take 6 features and interpolate old(16) to new(100) and create
     #new list of features with 100 values
     for feature_index in range(strokes.shape[1]):
         feature_values = strokes[:, feature_index] #take all collum of every feature
@@ -127,7 +145,17 @@ def resample_strokes(strokes: np.ndarray, max_points: int = 100) ->np.ndarray:
     #return pen_down only to 1.0 or 0.0 formate (cancell interpolation) if 0.5 and more = 1.0 else 0.0
     resampled_strokes[:, 4] = (resampled_strokes[:, 4] >= 0.5).astype(np.float32)
 
-    #return new full (100, 5) formate stroke
+    #rebuild stroke_start only to 1.0 or 0.0 formate (cancell interpolation) write 0.1 only if stroke started
+    resampled_strokes[:,5] = 0.0
+    previous_pen_down = 0.0
+
+    for i in range(len(resampled_strokes)):
+        current_pen_down = resampled_strokes[i, 4]
+        if current_pen_down == 1.0 and previous_pen_down == 0.0:
+            resampled_strokes[i, 5] = 1.0
+        previous_pen_down = current_pen_down
+
+    #return new full (100, 6) formate stroke
     return resampled_strokes.astype(np.float32)
 
 #main pipeline: json -> load data -> norm -> inetpolation -> complete
