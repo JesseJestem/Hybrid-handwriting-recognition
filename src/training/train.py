@@ -28,7 +28,7 @@ HISTORY_PATH = OUTPUT_DIR / "training_history.png"
 
 RANDOM_STATE = 42 #makes train/val/test split reproducible
 BATCH_SIZE = 32
-EPOCHS = 60
+EPOCHS = 70
 TRAIN_RATE = 0.0005
 
 #~~~~~~~~~~~~~~
