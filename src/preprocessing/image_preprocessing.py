@@ -3,7 +3,10 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #str | Path image path, -> np.ndarray, image_size: int = 64 - img allways 64 - says that we recive array at output
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 def preprocess_image(image_path: str | Path, image_size: int = 64) -> np.ndarray:
 
     image_path = Path(image_path)
@@ -57,7 +60,10 @@ def preprocess_image(image_path: str | Path, image_size: int = 64) -> np.ndarray
 
     return final_array.astype(np.float32)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #test code
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 if __name__ == "__main__":
     test_path = Path("data/raw/images/upper_A")
     if test_path.exists():
