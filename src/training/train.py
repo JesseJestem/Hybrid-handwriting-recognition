@@ -23,11 +23,13 @@ REPORT_PATH = OUTPUT_DIR / "classification_report.txt"
 CONFUSION_MATRIX_PATH = OUTPUT_DIR / "confusion_matrix.npy"
 HISTORY_PATH = OUTPUT_DIR / "training_history.png"
 
+#~~~~~~~~~~~~~~~~~~~~~~~
+#MODEL SETTINGS
+#~~~~~~~~~~~~~~~~~~~~~~~
+
 RANDOM_STATE = 42 #makes train/val/test split reproducible
 BATCH_SIZE = 32
 EPOCHS = 60
-TRAIN_RATE = 0.0005
-AUGMENT_COPIES = 1
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
@@ -174,7 +176,7 @@ def train():
     )
 
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=TRAIN_RATE),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         metrics=["accuracy"],
     )
