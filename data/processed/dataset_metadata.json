@@ -1,5 +1,5 @@
 {
-  "dataset_path": "C:\\Users\\andry\\OneDrive\\Документы\\GitHub\\Hybrid_handwriting_recognition\\data\\processed\\dataset.npz",
+  "dataset_path": "C:\\Users\\Andrii\\Documents\\GitHub\\Hybrid-handwriting-recognition\\data\\processed\\dataset.npz",
   "image_size": 64,
   "max_points": 100,
   "stroke_features": [
@@ -9,7 +9,7 @@
     "pressure",
     "pen_down"
   ],
-  "num_samples": 5186,
+  "num_samples": 6611,
   "num_classes": 52,
   "class_names": [
     "lower_a",
