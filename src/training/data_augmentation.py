@@ -6,8 +6,8 @@ from PIL import Image
 #!!!!!!!!!!!!!!!!!!!!!
 JITTER_STD = 0.005
 
-ANGLE_MIN = -8.0
-ANGLE_MAX = 8.0
+ANGLE_MIN = -15.0
+ANGLE_MAX = 15.0
 
 SCALE_MIN = 0.90
 SCALE_MAX = 1.10
