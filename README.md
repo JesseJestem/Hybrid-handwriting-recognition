@@ -380,31 +380,109 @@ This stage will require a different output structure because the model will need
 
 ## How to Run
 
-### 1. Install dependencies
+### 1. Create virtual environment
 
-```bash
-pip install -r requirements.txt
+```powershell
+python -m venv .venv
+```
+
+### 2. Install dependencies
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+If TensorFlow is missing or broken:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install tensorflow
+```
+
+---
+
+## Run Locally
+
+Use this if you open the app on the same computer.
+
+### Start backend
+
+From the project root:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+### Start frontend
+
+Open a second terminal:
+
+```powershell
+cd app/frontend
+..\..\.venv\Scripts\python.exe -m http.server 5500 --bind 127.0.0.1
+```
+
+Open in browser:
+
+```text
+http://127.0.0.1:5500
+```
+
+---
+
+## Run on Local Wi-Fi Network
+
+Use this if you want to open the app from another device on the same Wi-Fi network.
+
+### 1. Find your computer IPv4
+
+```powershell
+ipconfig
+```
+
+Example:
+
+```text
+192.168.1.35
 ```
 
 ### 2. Start backend
 
-```bash
-python -m uvicorn app.backend.main:app --reload
+From the project root:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The backend will run at:
+### 3. Start frontend
+
+Open a second terminal:
+
+```powershell
+cd app/frontend
+..\..\.venv\Scripts\python.exe -m http.server 5500 --bind 0.0.0.0
+```
+
+Open in browser:
 
 ```text
-http://127.0.0.1:8000
+http://YOUR_IPV4:5500
 ```
 
-### 3. Open frontend
-
-Open this file in the browser:
+Example:
 
 ```text
-app/frontend/index.html
+http://192.168.1.35:5500
 ```
+
+---
+
+## Notes
+
+* Backend and frontend must run at the same time.
+* Use two separate terminal windows.
+* `0.0.0.0` is only for server binding. Do not open it in the browser.
+* To stop a server, press `Ctrl + C`.
+* If Windows Firewall asks for permission, allow Python on private networks.
 
 ---
 
