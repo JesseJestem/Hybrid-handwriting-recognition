@@ -236,10 +236,11 @@ Example JSON file:
 - [x] Prediction from the browser interface
 - [x] Prediction confidence and Top-3 results
 - [x] Temporary prediction file cleanup
+- [x] Data augmentation
+- [x] Expand and balance the dataset
 
 ### In Progress
 
-- [ ] Expand and balance the dataset
 - [ ] CNN image model
 - [ ] Stroke-based sequence model
 - [ ] Analyze incorrect predictions
@@ -247,8 +248,6 @@ Example JSON file:
 
 ### Planned
 
-- [ ] Data augmentation
-- [ ] Data synthesis
 - [ ] Automated tests
 - [ ] Model and dataset versioning
 - [ ] Digits recognition
@@ -327,10 +326,9 @@ Tasks:
 - [x] Create prediction API
 - [x] Create confusion matrix
 - [x] Save classification report and training plots
-- [ ] Collect more data
-- [ ] Analyze incorrect predictions
-- [ ] Try data augmentation
-- [ ] Try data synthesis
+- [x] Collect more data
+- [x] Analyze incorrect predictions
+- [x] Try data augmentation
 - [ ] Compare three approaches:
   - image-only model
   - stroke-only model
@@ -390,61 +388,83 @@ This stage will require a different output structure because the model will need
 
 ## How to Run
 
-### 1. Install dependencies
+### 1. Create virtual environment
 
-```bash
-pip install -r requirements.txt
+```powershell
+python -m venv .venv
 ```
 
-### 2. Start backend
+### 2. Install dependencies
 
-```bash
-python -m uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-The backend will run at:
+### 3. Start backend
+
+From the project root:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Backend:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-### 3. Start frontend
+### 4. Start frontend
 
-```bash
+Open a second terminal:
+
+```powershell
 cd app/frontend
-python -m http.server 5500 --bind 0.0.0.0
+..\..\.venv\Scripts\python.exe -m http.server 5500 --bind 0.0.0.0
 ```
 
-The frontend will run at:
+Frontend:
 
 ```text
 http://127.0.0.1:5500
 ```
 
-Use the computer's local network IP instead of `127.0.0.1` to open the application from another device on the same network.
+To open the application from another device on the same Wi-Fi network, find the computer's IPv4 address:
 
-### 4. Check and build the dataset
-
-```bash
-python src/training/check_raw_dataset.py
-python src/training/build_dataset.py
+```powershell
+ipconfig
 ```
 
-### 5. Train and evaluate the model
+Then open:
 
-```bash
-python src/training/train.py
-python src/evaluation/plot_confusion_matrix.py
+```text
+http://YOUR_IPV4:5500
 ```
 
-### 6. Run prediction from browser
+### 5. Check and build the dataset
 
-```bash
-Open frontend in browser
-Write letter in canvas
-Press "Predict" button
-Check response stats under canvas
+Run from the project root:
+
+```powershell
+.\.venv\Scripts\python.exe src/training/check_raw_dataset.py
+.\.venv\Scripts\python.exe src/training/build_dataset.py
 ```
+
+### 6. Train and evaluate the model
+
+```powershell
+.\.venv\Scripts\python.exe src/training/train.py
+.\.venv\Scripts\python.exe src/evaluation/plot_confusion_matrix.py
+```
+
+### 7. Run prediction
+
+1. Open the frontend in a browser.
+2. Draw a letter on the canvas.
+3. Click **Predict**.
+4. Check the prediction and confidence values below the canvas.
+
+> The backend and frontend must run at the same time in separate terminals. Press `Ctrl + C` to stop either server.
 
 ---
 
