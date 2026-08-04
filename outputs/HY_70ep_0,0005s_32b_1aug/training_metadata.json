@@ -1,15 +1,6 @@
 {
+  "model_path": "C:\\Users\\Andrii\\Documents\\GitHub\\Hybrid-handwriting-recognition\\saved_models\\hybrid_letters.keras",
   "dataset_path": "C:\\Users\\Andrii\\Documents\\GitHub\\Hybrid-handwriting-recognition\\data\\processed\\dataset.npz",
-  "image_size": 64,
-  "max_points": 100,
-  "stroke_features": [
-    "x_norm",
-    "y_norm",
-    "t_norm",
-    "pressure",
-    "pen_down"
-  ],
-  "num_samples": 6611,
   "num_classes": 52,
   "class_names": [
     "lower_a",
@@ -119,5 +110,10 @@
     "Y",
     "Z"
   ],
-  "failed_samples": []
+  "test_loss": 0.2003134787082672,
+  "test_accuracy": 0.9455645084381104,
+  "batch_size": 32,
+  "epochs": 70,
+  "learning_rate": 0.0005,
+  "aug_copy_num": 1
 }
