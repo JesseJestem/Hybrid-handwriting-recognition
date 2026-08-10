@@ -40,7 +40,7 @@ RANDOM_STATE = 42 #makes train/val/test split reproducible
 BATCH_SIZE = 32
 EPOCHS = 70
 TRAIN_RATE = 0.0005
-AUGMENT_COPIES = 1
+AUGMENT_COPIES = 5
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
