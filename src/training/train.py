@@ -7,6 +7,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 import tensorflow as tf
 
+#GPU SETTINGS
+GPU_DEVICES = tf.config.list_physical_devices("GPU")
+
+print("TensorFlow:", tf.__version__)
+print("GPU devices:", GPU_DEVICES)
+
+for gpu in GPU_DEVICES:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
 #add path for import
 BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.append(str(BASE_DIR))
@@ -31,7 +40,7 @@ RANDOM_STATE = 42 #makes train/val/test split reproducible
 BATCH_SIZE = 32
 EPOCHS = 70
 TRAIN_RATE = 0.0005
-AUGMENT_COPIES = 1
+AUGMENT_COPIES = 5
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
