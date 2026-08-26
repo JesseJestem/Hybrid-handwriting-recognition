@@ -7,10 +7,20 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 import tensorflow as tf
 
+#GPU SETTINGS
+GPU_DEVICES = tf.config.list_physical_devices("GPU")
+
+print("TensorFlow:", tf.__version__)
+print("GPU devices:", GPU_DEVICES)
+
+for gpu in GPU_DEVICES:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
 #add path for import
 BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.append(str(BASE_DIR))
 from src.models.hybrid_model import build_hybrid_model
+from src.training.data_augmentation import augment_training_data
 
 DATASET_PATH = BASE_DIR / "data" / "processed" / "dataset.npz"
 OUTPUT_DIR = BASE_DIR / "outputs" #result folder
@@ -22,9 +32,15 @@ REPORT_PATH = OUTPUT_DIR / "classification_report.txt"
 CONFUSION_MATRIX_PATH = OUTPUT_DIR / "confusion_matrix.npy"
 HISTORY_PATH = OUTPUT_DIR / "training_history.png"
 
+#~~~~~~~~~~~~~~~~~~~~~~~
+#MODEL SETTINGS
+#~~~~~~~~~~~~~~~~~~~~~~~
+
 RANDOM_STATE = 42 #makes train/val/test split reproducible
 BATCH_SIZE = 32
-EPOCHS = 60
+EPOCHS = 70
+TRAIN_RATE = 0.0005
+AUGMENT_COPIES = 5
 
 #~~~~~~~~~~~~~~
 #check if dataset file exist?
@@ -88,6 +104,10 @@ def plot_training_history(history):
     plt.savefig(OUTPUT_DIR / "loss.png")
     plt.close()
 
+#~~~~~~~~~~~~~~~~~~~~~~~
+#Model Training
+#~~~~~~~~~~~~~~~~~~~~~~~
+
 def train():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -133,14 +153,41 @@ def train():
     print("Test strokes:", X_str_test.shape)
     print()
 
+    # ~~~~~~~~~~~~~~~~~
+    # Data augmentation only for train data
+    # ~~~~~~~~~~~~~~~~~
+
+    print("Before augmentation:")
+    print("Train images:", X_img_train.shape)
+    print("Train strokes:", X_str_train.shape)
+    print("Train labels:", y_train.shape)
+    print()
+
+    X_img_train, X_str_train, y_train = augment_training_data(
+        X_train_images=X_img_train,
+        X_train_strokes=X_str_train,
+        y_train=y_train,
+        copies_per_sample=AUGMENT_COPIES,
+    )
+
+    print("After augmentation:")
+    print("Train images:", X_img_train.shape)
+    print("Train strokes:", X_str_train.shape)
+    print("Train labels:", y_train.shape)
+    print()
+
+    #~~~~~~~~~~~~~~~~~~~~~
+    #Model building
+    #~~~~~~~~~~~~~~~~~~~~~
+    
     model = build_hybrid_model(
-        num_class=num_classes,
+        num_classes=num_classes,
         image_shape=X_images.shape[1:],
         stroke_shape=X_strokes.shape[1:],
     )
 
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=TRAIN_RATE),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         metrics=["accuracy"],
     )
@@ -262,13 +309,15 @@ def train():
     training_metadata = {
         'model_path': str(MODEL_PATH),
         'dataset_path': str(DATASET_PATH),
-        'num_class': int(num_classes),
+        'num_classes': int(num_classes),
         'class_names': class_names.tolist(),
         'display_labels': display_labels.tolist(),
         'test_loss': float(test_loss),
         'test_accuracy': float(test_accuracy),
         'batch_size': BATCH_SIZE,
         'epochs': EPOCHS,
+        'learning_rate': TRAIN_RATE,
+        'aug_copy_num': AUGMENT_COPIES,
     }
 
     with open(OUTPUT_DIR / "training_metadata.json", "w", encoding='utf-8') as f:

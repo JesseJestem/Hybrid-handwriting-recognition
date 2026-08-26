@@ -20,7 +20,10 @@ METADATA_PATH = PROCESSED_DIR / "dataset_metadata.json" #metadata: img size, str
 IMAGE_SIZE = 64
 MAX_POINTS = 100
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #folder name to label: upper_A → A, lower_a → a
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 def folder_to_label(folder_name: str) -> str: 
     
     if folder_name.startswith("upper_"):
@@ -31,7 +34,10 @@ def folder_to_label(folder_name: str) -> str:
     #if else: return just full names - for another symbhols
     return folder_name
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #take list of classes name
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 def get_class_folders() -> list[str]:
 
     #take name of folders: upper_A, lower_a
@@ -62,7 +68,10 @@ def get_class_folders() -> list[str]:
     
     return image_classes
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #take image + stroke and merge it to one dict in list: {"class_folder": "upper_A", "label": "A","class_index": 0,"image_path": "...png", "stroke_path": "...json"}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 def collect_sample_pairs(class_folders: list[str]) -> list[dict]:
 
     samples = []
@@ -95,6 +104,10 @@ def collect_sample_pairs(class_folders: list[str]) -> list[dict]:
             )
 
     return samples
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Dataset building
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def build_dataset():
 

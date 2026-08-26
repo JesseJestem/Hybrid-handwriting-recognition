@@ -9,7 +9,7 @@
     "pressure",
     "pen_down"
   ],
-  "num_samples": 2600,
+  "num_samples": 6611,
   "num_classes": 52,
   "class_names": [
     "lower_a",
