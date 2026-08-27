@@ -326,7 +326,7 @@ def distribute_points_between_strokes(
         for i in order[:missing_points]:
             points_per_segment[i] += 1
         
-        return points_per_segment, separator_points_per_gap
+    return points_per_segment, separator_points_per_gap
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #Resample all strokes
