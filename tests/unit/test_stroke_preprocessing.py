@@ -1,5 +1,4 @@
 import numpy as np
-from rich import segment
 
 from src.preprocessing.stroke_preprocessing import (
     normalize_strokes,
