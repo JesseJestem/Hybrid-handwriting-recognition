@@ -230,9 +230,9 @@ Pointer Events API
 
 ## Stage 1 — Engineering Foundation
 
-* [ ] Add `pytest`
-* [ ] Add stroke preprocessing tests
-* [ ] Add augmentation tests
+* [x] Add `pytest`
+* [x] Add stroke preprocessing tests
+* [x] Add augmentation tests
 * [ ] Add model smoke test
 * [ ] Add model save/load test
 * [ ] Create `pyproject.toml`

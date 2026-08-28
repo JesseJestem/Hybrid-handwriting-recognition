@@ -1,5 +1,4 @@
 import numpy as np
-from rich import segment
 
 from src.preprocessing.stroke_preprocessing import (
     normalize_strokes,
@@ -15,27 +14,9 @@ from src.preprocessing.stroke_preprocessing import (
 
 data = {
     "strokes":[
-        {
-            "x": 100,
-            "y": 200,
-            "t": 0,
-            "pressure": 0.5,
-            "pen_down": True,
-        },
-        {
-            "x": 120,
-            "y": 180,
-            "t": 10,
-            "pressure": 0.6,
-            "pen_down": True,
-        },
-        {
-            "x": 140,
-            "y": 160,
-            "t": 20,
-            "pressure": 0.7,
-            "pen_down": True,
-        },
+        {"x": 100, "y": 200, "t": 0, "pressure": 0.5, "pen_down": True},
+        {"x": 120, "y": 180, "t": 10, "pressure": 0.6, "pen_down": True},
+        {"x": 140, "y": 160, "t": 20, "pressure": 0.7, "pen_down": True},
     ]
 }
 
@@ -92,7 +73,7 @@ segment_2 = np.array([
 ], dtype=np.float32)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Shape test
+#1 Shape test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_normalize_strokes_returns_expected_shape():
@@ -105,7 +86,7 @@ def test_normalize_strokes_returns_expected_shape():
     assert result.shape == (3, 6)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Formate test
+#2 Formate test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_normalize_strokes_returns_float32():
@@ -116,7 +97,7 @@ def test_normalize_strokes_returns_float32():
     assert result.dtype == np.float32
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Coordinate test
+#3 Coordinate test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_normalize_strokes_normalizes_coordinates():
@@ -133,7 +114,7 @@ def test_normalize_strokes_normalizes_coordinates():
     assert np.all(y <= 1.0)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Time test
+#4 Time test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_normalize_strokes_normalizes_time():
@@ -148,7 +129,7 @@ def test_normalize_strokes_normalizes_time():
     )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Stroke start test
+#5 Stroke start test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_normalize_strokes_detects_stroke_start():
@@ -163,7 +144,7 @@ def test_normalize_strokes_detects_stroke_start():
     )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Pressure start test
+#6 Pressure start test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_normalize_strokes_clips_and_defaults_pressure():
@@ -177,7 +158,7 @@ def test_normalize_strokes_clips_and_defaults_pressure():
     )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Empty data test
+#7 Empty data test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_normalize_strokes_handles_empty_input():
@@ -189,7 +170,7 @@ def test_normalize_strokes_handles_empty_input():
     assert result.dtype == np.float32
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Reasmple points test
+#8 Reasmple points test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_resample_strokes_returns_requested_number_of_points():
@@ -200,7 +181,7 @@ def test_resample_strokes_returns_requested_number_of_points():
     assert result.shape == (50, 6)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Split stroke test
+#9 Split stroke test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_split_strokes_separates_segments():
@@ -212,7 +193,7 @@ def test_split_strokes_separates_segments():
     assert len(segments[1]) == 2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Split one stroke test
+#10 Split one stroke test
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_resample_single_stroke_interpolates_points():
@@ -244,9 +225,9 @@ def test_resample_single_stroke_interpolates_points():
         [1, 0, 0, 0, 0]
     )
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Split one stroke test
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#11 Split one stroke test
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_resample_single_stroke_repeats_single_point():
 
@@ -277,9 +258,9 @@ def test_resample_single_stroke_repeats_single_point():
         [1, 0, 0, 0, 0]
     )
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Distribute points strokes test
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#12 Distribute points strokes test
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def test_distribute_points_handles_zero_remaining_points():
 

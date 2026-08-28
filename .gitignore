@@ -14,3 +14,7 @@ env/
 
 #temp files
 data/temp/
+
+#other
+ptxas
+exit
