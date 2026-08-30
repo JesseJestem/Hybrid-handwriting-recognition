@@ -233,8 +233,8 @@ Pointer Events API
 * [x] Add `pytest`
 * [x] Add stroke preprocessing tests
 * [x] Add augmentation tests
-* [ ] Add model smoke test
-* [ ] Add model save/load test
+* [x] Add model smoke test
+* [x] Add model save/load test
 * [ ] Create `pyproject.toml`
 * [ ] Move code into `src/handwriting`
 * [ ] Remove `sys.path.append`
