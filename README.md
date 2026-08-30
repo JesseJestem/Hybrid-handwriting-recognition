@@ -235,7 +235,7 @@ Pointer Events API
 * [x] Add augmentation tests
 * [x] Add model smoke test
 * [x] Add model save/load test
-* [ ] Create `pyproject.toml`
+* [x] Create `pyproject.toml`
 * [ ] Move code into `src/handwriting`
 * [ ] Remove `sys.path.append`
 * [ ] Add typing

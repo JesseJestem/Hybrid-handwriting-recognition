@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stroke-handwriting-recognition"
+version = "0.1.0"
+description = "Stroke-based multilingual handwriting recognition system"
+requires-python = ">=3.11"
+
+dependencies = [
+    "numpy",
+    "tensorflow",
+    "scikit-learn",
+    "pillow",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
