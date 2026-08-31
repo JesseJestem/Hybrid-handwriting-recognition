@@ -1,5 +1,5 @@
 import numpy as np
-from src.training.data_augmentation import augment_strokes
+from handwriting.training.augmentation import augment_strokes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #TEST SAMPLES

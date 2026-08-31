@@ -8,7 +8,7 @@ sys.path.append(str(BASE_DIR)) #to import files from src/
 
 #import preprocess function
 from src.preprocessing.image_preprocessing import preprocess_image
-from src.preprocessing.stroke_preprocessing import preprocess_strokes
+from handwriting.preprocessing.strokes import preprocess_strokes
 
 IMAGE_DIR = BASE_DIR / "data" / "raw" / "images"
 STROKE_DIR = BASE_DIR / "data" / "raw" / "strokes"

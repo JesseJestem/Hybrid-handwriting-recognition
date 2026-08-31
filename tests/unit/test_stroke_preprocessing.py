@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.preprocessing.stroke_preprocessing import (
+from handwriting.preprocessing.strokes import (
     normalize_strokes,
     resample_strokes,
     split_strokes,

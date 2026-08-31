@@ -12,7 +12,7 @@ sys.path.append(str(BASE_DIR))
 
 #import project preprocess defs
 from src.preprocessing.image_preprocessing import preprocess_image
-from src.preprocessing.stroke_preprocessing import preprocess_strokes
+from handwriting.preprocessing.strokes import preprocess_strokes
 
 #models paths
 MODEL_PATH = BASE_DIR / "saved_models" / "hybrid_letters.keras"

@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from src.models.hybrid_model import build_hybrid_model
+from handwriting.models.hybrid import build_hybrid_model
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #1 Model build test
