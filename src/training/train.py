@@ -19,8 +19,8 @@ for gpu in GPU_DEVICES:
 #add path for import
 BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.append(str(BASE_DIR))
-from src.models.hybrid_model import build_hybrid_model
-from src.training.data_augmentation import augment_training_data
+from handwriting.models.hybrid import build_hybrid_model
+from handwriting.training.augmentation import augment_training_data
 
 DATASET_PATH = BASE_DIR / "data" / "processed" / "dataset.npz"
 OUTPUT_DIR = BASE_DIR / "outputs" #result folder
