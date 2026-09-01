@@ -1,17 +1,21 @@
 from pathlib import Path
-#using PIL to process images (editor)
-from PIL import Image
+
 import numpy as np
 
+#using PIL to process images (editor)
+from PIL import Image
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#str | Path image path, -> np.ndarray, image_size: int = 64 - img allways 64 - says that we recive array at output
+#str | Path image path, -> np.ndarray, image_size: int = 64
+# img allways 64 - says that we receive array at output
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def preprocess_image(image_path: str | Path, image_size: int = 64) -> np.ndarray:
 
     image_path = Path(image_path)
 
-    image = Image.open(image_path).convert("L") # open image as gray scale 255-white, 0-black. P.S. color - R, G, B
+    # open image as gray scale 255-white, 0-black. P.S. color - R, G, B
+    image = Image.open(image_path).convert("L")
     image_array = np.array(image) #convert image in array
 
     mask = image_array < 250 #find not white px as true/false
@@ -19,15 +23,16 @@ def preprocess_image(image_path: str | Path, image_size: int = 64) -> np.ndarray
     if not np.any(mask): #find true in mask
         return np.zeros((image_size, image_size, 1), dtype = np.float32) #if no - return zeros array
 
-    y_indices, x_indices = np.where(mask) #take all true px coordinate y-vertical, x-horizontal, image_array[y][x]
+    # take all true px coordinate y-vertical, x-horizontal, image_array[y][x]
+    y_indices, x_indices = np.where(mask)
 
     #take borders of letter
     x_min,x_max = x_indices.min(), x_indices.max()
     y_min,y_max = y_indices.min(), y_indices.max()
 
     #crop only letter
-    cropped = image.crop((x_min, y_min, x_max + 1, y_max + 1)) #left, top, right, bottom (+1 brcause last px will be cropped)
-
+    # left, top, right, bottom (+1 brcause last px will be cropped)
+    cropped = image.crop((x_min, y_min, x_max + 1, y_max + 1))
     #add padding to centrate image
     padding = 20
     padded_width = cropped.width + padding * 2 #left + right
@@ -37,7 +42,8 @@ def preprocess_image(image_path: str | Path, image_size: int = 64) -> np.ndarray
     padded = Image.new("L", (padded_width, padded_heigth), color = 255)
     padded.paste(cropped,(padding,padding)) #image, coordinate x,y
 
-    #resize = thumbnail-save proportion[y,x], Image.Resampling.LANCZOS-change image size algoritm-saving data quality
+    #resize = thumbnail-save proportion[y,x]
+    #Image.Resampling.LANCZOS-change image size algorithm-saving data quality
     padded.thumbnail((image_size, image_size), Image.Resampling.LANCZOS)
 
     #create final white img

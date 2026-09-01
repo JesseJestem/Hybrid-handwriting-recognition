@@ -1,11 +1,14 @@
-from pathlib import Path
-import sys
 import json
-import numpy as np
+from pathlib import Path
+
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
+import numpy as np
 import tensorflow as tf
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+
+from handwriting.models.hybrid import build_hybrid_model
+from handwriting.training.augmentation import augment_training_data
 
 #GPU SETTINGS
 GPU_DEVICES = tf.config.list_physical_devices("GPU")
@@ -18,9 +21,6 @@ for gpu in GPU_DEVICES:
 
 #add path for import
 BASE_DIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(BASE_DIR))
-from handwriting.models.hybrid import build_hybrid_model
-from handwriting.training.augmentation import augment_training_data
 
 DATASET_PATH = BASE_DIR / "data" / "processed" / "dataset.npz"
 OUTPUT_DIR = BASE_DIR / "outputs" #result folder
@@ -52,7 +52,8 @@ def load_dataset():
                                 "Run build_dataset.py first")
 
     #load dataset from .npz
-    data = np.load(DATASET_PATH, allow_pickle=True) #allow to load python objects from file (X_images, X_strokes...)
+    # allow to load python objects from file (X_images, X_strokes...)
+    data = np.load(DATASET_PATH, allow_pickle=True)
 
     X_images = data["X_images"]
     X_strokes = data["X_strokes"]
