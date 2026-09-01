@@ -1,648 +1,572 @@
-# Hybrid Handwriting Recognition
+# Stroke Handwriting Recognition
 
-## Project Overview
+Stroke-based multilingual handwriting recognition system for handwritten input captured from a mouse, touchscreen, or stylus.
 
-This project is a handwriting recognition system for handwritten input from a mouse, touchpad, touchscreen, or stylus.
-
-The current MVP combines a data collection application with a trained hybrid neural network that uses image-based and stroke-based recognition.
-
-The first target is recognition of uppercase and lowercase English letters:
+The project originally used a hybrid CNN + GRU model. The current architecture is being refactored around **stroke-only recognition**.
 
 ```text
-A-Z
-a-z
+Finger / Stylus
+      ↓
+Stroke Capture
+      ↓
+Preprocessing
+      ↓
+Stroke Encoder
+      ↓
+Recognition
+      ↓
+Unicode Text
+      ↓
+Language Correction
+      ↓
+Clean Text / Handwriting
 ```
 
-In future versions, the project will be extended to support:
+## Goal
 
-- digits
-- special symbols
-- other alphabets
-- full word recognition
-
----
-
-## Project Goal
-
-The final goal is to create a neural network that can recognize handwritten text from touch or stylus input.
-
-Unlike a simple image classifier, this project uses a hybrid approach:
+Build a mobile application that can recognize and improve handwritten text in:
 
 ```text
-Handwritten image + stroke movement data → neural network → predicted character / word
+English
+Українська
+Русский
+Digits
+Punctuation
+Common symbols
 ```
 
-This allows the model to learn not only the final shape of a character, but also how the character was written.
-
----
-
-## Current Stage
-
-The project is currently at the first working MVP stage.
-
-The application allows the user to:
-
-- select a character label
-- draw a handwritten character on a canvas
-- save the drawing as a PNG image
-- save stroke coordinates as JSON data
-- collect and extend a custom dataset
-- predict a handwritten character with the trained hybrid model
-- display prediction confidence and Top-3 results
-
----
-
-## Why Hybrid Recognition?
-
-There are two common ways to recognize handwriting.
-
-### 1. Image-based recognition
-
-The model receives only the final image.
-
-Example:
+Long-term goal:
 
 ```text
-PNG image of letter "A" → model → "A"
-```
-
-This approach is simple and works well with CNN models.
-
-### 2. Stroke-based recognition
-
-The model receives the sequence of points created while writing.
-
-Example:
-
-```json
-[
-  { "x": 120, "y": 300, "t": 0 },
-  { "x": 125, "y": 290, "t": 16 },
-  { "x": 130, "y": 280, "t": 32 }
-]
-```
-
-This approach allows the model to understand writing direction, speed, movement order, and pauses.
-
-### 3. Hybrid approach
-
-This project combines both approaches:
-
-```text
-Image input → CNN branch
-Stroke input → LSTM / GRU / Transformer branch
-Combined features → classifier
-```
-
-The hybrid model is expected to be stronger than using only images or only stroke data.
-
----
-
-## Current Model Architecture
-
-The current model classifies individual English letters.
-
-```text
-Input 1: 64x64 grayscale image
+raw vector handwriting
         ↓
-        CNN branch
+multilingual recognition
         ↓
-        image features
-
-Input 2: sequence of stroke points
+language-aware correction
         ↓
-        LSTM / GRU branch
+clean text
         ↓
-        stroke features
-
-image features + stroke features
-        ↓
-        Dense layers
-        ↓
-        Softmax
-        ↓
-        predicted character
-```
-
-Initial output classes:
-
-```text
-A-Z + a-z = 52 classes
+clean vector handwriting
 ```
 
 ---
 
-## Data Format
+## Current Status
 
-Each sample consists of two files:
+Existing MVP:
+
+* [x] Web drawing canvas
+* [x] Pointer/stylus stroke collection
+* [x] PNG and JSON sample export
+* [x] Dataset collection workflow
+* [x] Stroke preprocessing
+* [x] Image preprocessing
+* [x] Data augmentation
+* [x] CNN + GRU hybrid experiment
+* [x] TensorFlow training
+* [x] Model evaluation
+* [x] Confusion matrix
+* [x] FastAPI backend
+* [x] Browser prediction
+* [x] Confidence and Top-K output
+
+Current direction:
 
 ```text
-1. PNG image
-2. JSON stroke data
+Hybrid experimental MVP
+        ↓
+Engineering refactor
+        ↓
+Stroke-only production architecture
 ```
 
-Example dataset structure:
+---
+
+## Stroke Representation
+
+Raw input may contain:
 
 ```text
-data/
-└── raw/
-    ├── images/
-    │   ├── upper_A/
-    │   ├── upper_B/
-    │   ├── lower_a/
-    │   └── lower_b/
-    │
-    └── strokes/
-        ├── upper_A/
-        ├── upper_B/
-        ├── lower_a/
-        └── lower_b/
+x
+y
+time
+pressure
+stroke boundaries
 ```
 
-Example JSON file:
+The baseline model should rely on features available across different datasets:
 
-```json
-{
-  "label": "A",
-  "image_path": "C:\\Users....A_20260523_011849_558783.png",
-  "canvas_width": 400,
-  "canvas_height": 400,
-  "strokes": [
-    {
-      "x": 120.5,
-      "y": 330.1,
-      "t": 0,
-      "pressure": 0.5,
-      "pen_down": true
-    }
-  ]
-}
+```text
+x
+y
+dx
+dy
+stroke_start
+```
+
+`time` and `pressure` are optional features and may be evaluated in later experiments.
+
+The current fixed-length character representation will eventually be replaced with variable-length sequences.
+
+---
+
+## Data Strategy
+
+The project supports multiple dataset sources through adapters.
+
+```text
+dataset source
+      ↓
+DatasetAdapter
+      ↓
+StrokeSequence
+      ↓
+common preprocessing
+      ↓
+model
+```
+
+Planned sources:
+
+```text
+Native dataset      → EN / UK / RU
+UJI Pen Characters  → English characters, digits, symbols
+UNIPEN              → English characters, words, text
+IAM-OnDB            → sequence-recognition research benchmark
+```
+
+External datasets are not stored directly in the repository.
+
+Each sample should preserve:
+
+```text
+label
+language
+writer_id
+session_id
+source_dataset
+stroke sequence
+```
+
+Train/validation/test splitting should be writer-aware.
+
+---
+
+## Target Architecture
+
+```text
+src/handwriting/
+├── core/
+│   ├── config.py
+│   ├── logging.py
+│   ├── exceptions.py
+│   └── types.py
+│
+├── data/
+│   ├── dataset.py
+│   ├── manifest.py
+│   ├── split.py
+│   └── adapters/
+│       ├── native.py
+│       ├── uji.py
+│       ├── unipen.py
+│       └── iam_ondb.py
+│
+├── preprocessing/
+│   ├── strokes.py
+│   └── features.py
+│
+├── models/
+│   ├── stroke_encoder.py
+│   ├── stroke_classifier.py
+│   └── model_factory.py
+│
+├── training/
+│   ├── trainer.py
+│   ├── experiment.py
+│   └── cli.py
+│
+├── evaluation/
+│   ├── metrics.py
+│   └── benchmark.py
+│
+└── inference/
+    ├── model_store.py
+    ├── service.py
+    └── results.py
 ```
 
 ---
 
 ## Tech Stack
 
-### Frontend
-
-- HTML
-- CSS
-- JavaScript
-- Canvas API
-- Pointer Events API
-
-### Backend
-
-- Python
-- FastAPI
-- Uvicorn
-- Pydantic
-
-### Machine Learning Stack
-
-- TensorFlow / Keras
-- NumPy
-- Pillow
-- scikit-learn
-- Matplotlib
-
----
-
-## Features
-
-### Implemented
-
-- [x] Drawing canvas
-- [x] Character label selection
-- [x] PNG image export
-- [x] FastAPI endpoint for saving samples
-- [x] Dataset folder structure
-- [x] JSON stroke export
-- [x] Stroke coordinate collection
-- [x] Support for uppercase English letters
-- [x] Support for lowercase English letters
-- [x] Dataset collection workflow
-- [x] Image preprocessing
-- [x] Stroke preprocessing
-- [x] Dataset preprocessing script
-- [x] Dataset builder
-- [x] Hybrid model
-- [x] Model training and evaluation
-- [x] Classification report
-- [x] Confusion matrix
-- [x] Saved Keras model
-- [x] Command-line prediction tool
-- [x] FastAPI prediction endpoint
-- [x] Prediction from the browser interface
-- [x] Prediction confidence and Top-3 results
-- [x] Temporary prediction file cleanup
-- [x] Data augmentation
-- [x] Expand and balance the dataset
-
-### In Progress
-
-- [ ] CNN image model
-- [ ] Stroke-based sequence model
-- [ ] Analyze incorrect predictions
-- [ ] Improve model evaluation on new handwriting sessions and writers
-
-### Planned
-
-- [ ] Automated tests
-- [ ] Model and dataset versioning
-- [ ] Digits recognition
-- [ ] Symbol recognition
-- [ ] Other alphabets
-- [ ] Word-level recognition
-
----
-
-## Roadmap
-
-### Phase 1: Data Collection App
-
-Goal: collect handwritten English letters.
-
-Target classes:
-
 ```text
-A-Z
-a-z
+Python
+TensorFlow / Keras
+NumPy
+scikit-learn
+FastAPI
+Pydantic
+pytest
+ruff
+mypy
+GitHub Actions
+Docker
 ```
 
-Tasks:
-
-- [x] Create canvas interface
-- [x] Collect stroke points
-- [x] Save image data
-- [x] Save stroke data
-- [x] Improve UI
-- [x] Add uppercase and lowercase label selector
-- [x] Add sample counter
-- [x] Add dataset statistics
-
----
-
-### Phase 2: Dataset Preprocessing
-
-Goal: convert raw data into training-ready arrays.
-
-Tasks:
-
-- [x] Load PNG images
-- [x] Convert images to grayscale
-- [x] Crop empty space
-- [x] Resize images to 64x64
-- [x] Normalize pixel values
-- [x] Load JSON stroke data
-- [x] Normalize coordinates
-- [x] Normalize time values
-- [x] Pad or resample stroke sequences
-- [x] Build dataset
-- [x] Save processed dataset as `.npz`
-
-Expected output:
+Frontend:
 
 ```text
-X_images.shape  = (samples, 64, 64, 1)
-X_strokes.shape = (samples, max_points, features)
-y.shape         = (samples,)
+HTML
+CSS
+JavaScript
+Canvas API
+Pointer Events API
 ```
 
 ---
 
-### Phase 3: Letter Recognition Model
+# Development Roadmap
 
-Goal: train a hybrid neural network for individual character recognition.
+## Stage 1 — Engineering Foundation
 
-Tasks:
+* [x] Add `pytest`
+* [x] Add stroke preprocessing tests
+* [x] Add augmentation tests
+* [x] Add model smoke test
+* [x] Add model save/load test
+* [x] Create `pyproject.toml`
+* [x] Add Ruff
+* [x] Add typing
+* [x] Add Mypy
+* [x] Move code into `src/handwriting`
+* [x] Remove `sys.path.append`
 
-- [x] Build CNN branch for image input
-- [x] Build GRU branch for stroke input
-- [x] Concatenate image and stroke features
-- [x] Train classifier on uppercase and lowercase English letters
-- [x] Evaluate accuracy
-- [x] Add prediction in app
-- [x] Create prediction API
-- [x] Create confusion matrix
-- [x] Save classification report and training plots
-- [x] Collect more data
-- [x] Analyze incorrect predictions
-- [x] Try data augmentation
-- [ ] Compare three approaches:
-  - image-only model
-  - stroke-only model
-  - hybrid model
+**Result:** existing behaviour is protected before refactoring.
 
 ---
 
-### Phase 4: Extended Character Set
+## Stage 2 — Core Architecture
 
-Goal: support more writing systems, digits, and symbols.
+* [ ] Add centralized configuration
+* [ ] Add domain types
+* [ ] Add domain exceptions
+* [ ] Add structured logging
+* [ ] Replace development `print()` calls
+* [ ] Add training configuration
+* [ ] Add request IDs
+* [ ] Normalize project paths
 
-Planned classes:
+**Result:** shared application infrastructure.
+
+---
+
+## Stage 3 — Dataset System
+
+* [ ] Split preprocessing into small functions
+* [ ] Add input validation
+* [ ] Add feature extraction
+* [ ] Create `DatasetRepository`
+* [ ] Create dataset manifests
+* [ ] Add dataset versioning
+* [ ] Add preprocessing versioning
+* [ ] Add `writer_id`
+* [ ] Add `session_id`
+* [ ] Add `source_dataset`
+* [ ] Add writer-aware splitting
+* [ ] Create native dataset adapter
+* [ ] Create UJI adapter
+* [ ] Integrate UJI Pen Characters
+* [ ] Evaluate UNIPEN integration
+* [ ] Add UNIPEN adapter
+* [ ] Add IAM-OnDB research adapter
+
+**Result:** different stroke datasets use one internal representation.
+
+---
+
+## Stage 4 — Stroke Character Model
+
+* [ ] Create `StrokeEncoder`
+* [ ] Create `StrokeClassifier`
+* [ ] Keep GRU as baseline
+* [ ] Use geometry-based baseline features
+* [ ] Add masking/padding support
+* [ ] Add model versioning
+* [ ] Add parameter count
+* [ ] Add model tests
+* [ ] Train on native + UJI data
+* [ ] Compare writer-independent results
+
+**Result:** clean stroke-only character recognition baseline.
+
+---
+
+## Stage 5 — Production Training
+
+* [ ] Create `Trainer`
+* [ ] Create `ExperimentRun`
+* [ ] Create training CLI
+* [ ] Add callbacks
+* [ ] Measure training stages
+* [ ] Store training metadata
+* [ ] Store Git commit
+* [ ] Store evaluation reports
+* [ ] Store training plots
+* [ ] Create model registry
+
+**Result:** every experiment is reproducible.
+
+---
+
+## Stage 6 — Production Inference
+
+* [ ] Create `ModelStore`
+* [ ] Add model caching
+* [ ] Create `InferenceService`
+* [ ] Create `RecognitionResult`
+* [ ] Add Top-K predictions
+* [ ] Add inference timings
+* [ ] Create `BenchmarkRunner`
+* [ ] Measure p50 / p95 latency
+* [ ] Measure model size
+
+**Result:** ML inference is independent from the API.
+
+---
+
+## Stage 7 — Backend and Quality
+
+* [ ] Split FastAPI into routers
+* [ ] Move Pydantic models into schemas
+* [ ] Add `/api/v1`
+* [ ] Remove image requirement from prediction
+* [ ] Add language selection
+* [ ] Add exception handlers
+* [ ] Add health endpoints
+* [ ] Add API tests
+* [ ] Add integration tests
+* [ ] Add coverage
+* [ ] Add GitHub Actions
+* [ ] Add Docker backend
+
+**Result:** stable API for web and mobile applications.
+
+---
+
+## Stage 8 — Multilingual Characters
+
+* [ ] Create versioned Unicode vocabulary
+* [ ] Add English alphabet
+* [ ] Add Ukrainian alphabet
+* [ ] Add Russian alphabet
+* [ ] Add digits
+* [ ] Add punctuation
+* [ ] Add symbols
+* [ ] Collect Ukrainian stroke data
+* [ ] Collect Russian stroke data
+* [ ] Add language metadata
+* [ ] Train multilingual character model
+* [ ] Analyze Latin/Cyrillic confusion
+
+**Result:** multilingual isolated-character recognition.
+
+---
+
+## Stage 9 — Words and Sentences
+
+* [ ] Remove fixed 100-point limitation
+* [ ] Support variable-length sequences
+* [ ] Add padding and masking
+* [ ] Create sequence encoder
+* [ ] Build BiGRU baseline
+* [ ] Evaluate Transformer encoder
+* [ ] Add CTC decoder
+* [ ] Train on words
+* [ ] Train on text lines
+* [ ] Add CER
+* [ ] Add WER
+* [ ] Benchmark with IAM-OnDB
+
+**Result:** stroke sequences become complete Unicode text.
+
+---
+
+## Stage 10 — Text Correction
+
+* [ ] Create `CorrectionService`
+* [ ] Integrate English dictionary
+* [ ] Integrate Ukrainian dictionary
+* [ ] Integrate Russian dictionary
+* [ ] Add Hunspell support
+* [ ] Add edit-distance candidate generation
+* [ ] Add frequency-based ranking
+* [ ] Integrate `wordfreq`
+* [ ] Add contextual ranking
+* [ ] Evaluate correction separately from recognition
+
+Correction pipeline:
 
 ```text
-A-Z
-a-z
-0-9
-.,!?+-*/=()[]{}@#$%
+recognized text
+      ↓
+dictionary candidates
+      ↓
+edit distance
+      ↓
+frequency ranking
+      ↓
+corrected text
 ```
 
-Future alphabets:
-
-- Japanese kana
-- Cyrillic
-- other alphabets
+**Result:** recognition errors can be corrected without an LLM.
 
 ---
 
-### Phase 5: Word Recognition
+## Stage 11 — Mobile MVP
 
-Goal: move from single-character recognition to word-level recognition.
+* [ ] Create mobile application
+* [ ] Add drawing surface
+* [ ] Add stylus support
+* [ ] Capture pressure where available
+* [ ] Capture stroke sequences
+* [ ] Add language selection
+* [ ] Connect FastAPI
+* [ ] Display predictions
+* [ ] Display corrected text
+* [ ] Add handwriting-style rendering
 
-Planned architecture:
+**Result:** first usable mobile application.
+
+---
+
+## Stage 12 — Handwriting Beautification
+
+* [ ] Preserve word layout
+* [ ] Preserve line layout
+* [ ] Render clean glyphs
+* [ ] Research stroke decoder
+* [ ] Separate content and handwriting style
+* [ ] Generate clean vector strokes
+* [ ] Add style conditioning
+* [ ] Add user-style mode
+
+**Result:** poor handwriting can be reconstructed as clean handwriting.
+
+---
+
+## Stage 13 — On-Device Production
+
+* [ ] Optimize model size
+* [ ] Export mobile model
+* [ ] Benchmark on mobile hardware
+* [ ] Evaluate CPU / GPU / NPU
+* [ ] Add offline recognition
+* [ ] Add offline correction
+* [ ] Add privacy controls
+* [ ] Add model update mechanism
+
+**Result:** offline production mobile handwriting recognition.
+
+---
+
+## Current Model Direction
+
+Character baseline:
 
 ```text
-Word image + stroke sequence
+Stroke Sequence
+      ↓
+StrokeEncoder
+      ↓
+GRU
+      ↓
+Classifier
+      ↓
+Unicode Character
+```
+
+Future sequence model:
+
+```text
+Variable-Length Strokes
         ↓
-CNN + sequence model
+Sequence Encoder
         ↓
-CTC / sequence decoder
+CTC
         ↓
-recognized word
+Unicode Text
 ```
 
-Examples:
+---
+
+## Correction Resources
+
+Planned correction layer:
 
 ```text
-hello
-machine
-data
-learning
+Hunspell
++
+wordfreq
++
+edit distance / SymSpell
 ```
 
-This stage will require a different output structure because the model will need to predict a sequence of characters instead of a single class.
+Recognition and correction remain independent components.
 
 ---
 
 ## How to Run
 
-### 1. Create virtual environment
+Current legacy MVP:
 
 ```powershell
 python -m venv .venv
-```
 
-### 2. Install dependencies
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,legacy]"
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-### 3. Start backend
-
-From the project root:
-
-```powershell
 .\.venv\Scripts\python.exe -m uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Backend:
-
-```text
-http://127.0.0.1:8000
-```
-
-### 4. Start frontend
-
-Open a second terminal:
+Frontend:
 
 ```powershell
 cd app/frontend
 ..\..\.venv\Scripts\python.exe -m http.server 5500 --bind 0.0.0.0
 ```
 
-Frontend:
-
-```text
-http://127.0.0.1:5500
-```
-
-To open the application from another device on the same Wi-Fi network, find the computer's IPv4 address:
-
-```powershell
-ipconfig
-```
-
-Then open:
-
-```text
-http://YOUR_IPV4:5500
-```
-
-### 5. Check and build the dataset
-
-Run from the project root:
-
-```powershell
-.\.venv\Scripts\python.exe src/training/check_raw_dataset.py
-.\.venv\Scripts\python.exe src/training/build_dataset.py
-```
-
-### 6. Train and evaluate the model
-
-```powershell
-.\.venv\Scripts\python.exe src/training/train.py
-.\.venv\Scripts\python.exe src/evaluation/plot_confusion_matrix.py
-```
-
-### 7. Run prediction
-
-1. Open the frontend in a browser.
-2. Draw a letter on the canvas.
-3. Click **Predict**.
-4. Check the prediction and confidence values below the canvas.
-
-> The backend and frontend must run at the same time in separate terminals. Press `Ctrl + C` to stop either server.
+These commands will change after the package and CLI refactor.
 
 ---
 
-## API Endpoint
+## Target API
 
-### Save sample
+```text
+POST /api/v1/predict
+POST /api/v1/samples
 
-```http
-POST /save-sample
+GET /api/v1/models/current
+
+GET /health/live
+GET /health/ready
 ```
 
-Request body:
-
-```json
-{
-  "label": "A",
-  "image": "base64_png_image",
-  "strokes": [
-    {
-      "x": 120,
-      "y": 300,
-      "t": 0,
-      "pressure": 0.5,
-      "pen_down": true
-    }
-  ],
-  "canvas_width": 400,
-  "canvas_height": 400
-}
-```
-
-Response:
-
-```json
-{
-  "status": "saved",
-  "label": "A",
-  "image_path": "data/raw/images/upper_A/upper_A_timestamp.png",
-  "stroke_path": "data/raw/strokes/upper_A/upper_A_timestamp.json",
-  "points_count": 128,
-  "samples_count": 100
-}
-```
-
-### Predict character
-
-```http
-POST /predict
-```
-
-Request body:
-
-```json
-{
-  "image": "base64_png_image",
-  "strokes": [
-    {
-      "x": 120,
-      "y": 300,
-      "t": 0,
-      "pressure": 0.5,
-      "pen_down": true
-    }
-  ],
-  "canvas_width": 400,
-  "canvas_height": 400
-}
-```
-
-Response:
-
-```json
-{
-  "prediction": "A",
-  "confidence": 0.96,
-  "top_3": [
-    {
-      "label": "A",
-      "confidence": 0.96
-    },
-    {
-      "label": "H",
-      "confidence": 0.02
-    },
-    {
-      "label": "R",
-      "confidence": 0.01
-    }
-  ]
-}
-```
+Prediction should use stroke data directly and should not require a PNG image.
 
 ---
 
-## Dataset Collection Target
-
-Initial target:
+## Final Vision
 
 ```text
-52 classes:
-A-Z + a-z
-```
-
-Minimum dataset size:
-
-```text
-52 classes × 50 samples = 2,600 samples
-```
-
-Better target:
-
-```text
-52 classes × 100 samples = 5,200 samples
-```
-
-Current raw dataset:
-
-```text
-4,761 paired PNG + JSON samples
-Dataset expansion to at least 100 samples per class is in progress
-```
-
-Current processed dataset:
-
-```text
-2,600 samples
-52 classes x 50 samples
-```
-
-Future target:
-
-```text
-52 classes × 300 samples = 15,600 samples
-```
-
----
-
-## Results
-
-The first hybrid model experiments were trained on the processed dataset with 2,600 samples.
-
-| Model | Accuracy | Notes |
-|---|---:|---|
-| CNN image-only | TBD | Baseline model |
-| Stroke-only LSTM / GRU | TBD | Sequence model |
-| Hybrid CNN + GRU | 94.62% | Best current experiment, learning rate 0.0005 |
-
-The current result uses a random train/validation/test split. Future evaluation should also use separate handwriting sessions and data from different writers.
-
----
-
-## Learning Goals
-
-This project is designed to practice and demonstrate:
-
-- data collection for machine learning
-- frontend and backend integration
-- working with handwritten input
-- image preprocessing
-- sequence preprocessing
-- CNN architecture
-- LSTM / GRU sequence modeling
-- hybrid neural network design
-- model evaluation
-- real-world ML pipeline design
-
----
-
-## Project Status
-
-Current status:
-
-```text
-Working MVP with data collection, preprocessing, training, evaluation, and prediction
-```
-
-Next major step:
-
-```text
-Complete the balanced dataset, rebuild it, retrain the hybrid model, and compare it with image-only and stroke-only models
+Finger / Stylus
+      ↓
+Stroke Capture
+      ↓
+Multilingual Recognition
+      ↓
+Language Correction
+      ↓
+Clean Text
+      ↓
+Clean Vector Handwriting
 ```

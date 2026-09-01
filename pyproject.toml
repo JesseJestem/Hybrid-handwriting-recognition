@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stroke-handwriting-recognition"
+version = "0.1.0"
+description = "Stroke-based multilingual handwriting recognition system"
+requires-python = ">=3.11"
+
+dependencies = [
+    "numpy",
+    "tensorflow",
+    "scikit-learn",
+    "pillow",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+
+]
+
+legacy = [
+    "matplotlib",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = [
+    "src/handwriting/legacy",
+]
+
+[tool.ruff.lint]
+select = [
+    "E", # basic style/errors
+    "F", # Pyflakes - real problems in Python-code
+    "I", # imports
+]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/handwriting"]
+check_untyped_defs = true
+warn_unused_ignores = true
+exclude = [
+    "src/handwriting/legacy/",
+]
