@@ -6,16 +6,37 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
 
 # Virtual environments
 .venv/
 venv/
 env/
 
-#temp files
-data/temp/
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-#other
+# Local/generated data
+data/temp/
+data/processed/
+data/raw/
+
+# ML artifacts
+outputs/
+saved_models/
+
+# Logs
+*.log
+logs/
+
+# Local machine artifacts
 ptxas
 exit
-*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db

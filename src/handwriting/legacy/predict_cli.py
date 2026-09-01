@@ -1,5 +1,4 @@
 import argparse  # allow run a file from the terminal with arguments (send path to img and stroke)
-from pathlib import Path
 
 #import predictions def
 from handwriting.legacy.predictor import predict_from_files
