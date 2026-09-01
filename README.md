@@ -239,8 +239,8 @@ Pointer Events API
 * [x] Add Ruff
 * [x] Add typing
 * [x] Add Mypy
-* [ ] Move code into `src/handwriting`
-* [ ] Remove `sys.path.append`
+* [x] Move code into `src/handwriting`
+* [x] Remove `sys.path.append`
 
 **Result:** existing behaviour is protected before refactoring.
 
