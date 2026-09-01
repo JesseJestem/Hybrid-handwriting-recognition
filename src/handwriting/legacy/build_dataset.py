@@ -7,7 +7,7 @@ import numpy as np
 from handwriting.legacy.image_preprocessing import preprocess_image
 from handwriting.preprocessing.strokes import preprocess_strokes
 
-BASE_DIR = Path(__file__).resolve().parents[2] #Hybrid_handwriting_recognition/
+BASE_DIR = Path(__file__).resolve().parents[3] #Hybrid_handwriting_recognition/
 
 IMAGE_DIR = BASE_DIR / "data" / "raw" / "images"
 STROKE_DIR = BASE_DIR / "data" / "raw" / "strokes"

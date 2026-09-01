@@ -4,8 +4,6 @@ from pathlib import Path
 #import predictions def
 from handwriting.legacy.predictor import predict_from_files
 
-BASE_DIR = Path(__file__).resolve().parents[2]
-
 #~~~~~~~~~~~~~~~~~~~~
 #main file runing (in CMD without rest API)
 #~~~~~~~~~~~~~~~~~~~

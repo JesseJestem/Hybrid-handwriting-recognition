@@ -20,7 +20,7 @@ for gpu in GPU_DEVICES:
     tf.config.experimental.set_memory_growth(gpu, True)
 
 #add path for import
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[3]
 
 DATASET_PATH = BASE_DIR / "data" / "processed" / "dataset.npz"
 OUTPUT_DIR = BASE_DIR / "outputs" #result folder
