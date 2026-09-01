@@ -23,7 +23,6 @@ htmlcov/
 # Local/generated data
 data/temp/
 data/processed/
-data/raw/
 
 # ML artifacts
 outputs/
