@@ -1,4 +1,5 @@
 import numpy as np
+
 from handwriting.training.augmentation import augment_strokes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

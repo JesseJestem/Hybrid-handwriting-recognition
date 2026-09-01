@@ -1,11 +1,11 @@
 import numpy as np
 
 from handwriting.preprocessing.strokes import (
+    distribute_points_between_strokes,
     normalize_strokes,
+    resample_single_stroke,
     resample_strokes,
     split_strokes,
-    resample_single_stroke,
-    distribute_points_between_strokes,
 )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

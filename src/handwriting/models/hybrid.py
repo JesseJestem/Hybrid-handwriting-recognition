@@ -1,5 +1,5 @@
-import tensorflow as tf
-from tensorflow.keras import layers, Model
+from tensorflow.keras import Model, layers
+
 
 def build_hybrid_model(
         num_classes: int, 
@@ -14,13 +14,15 @@ def build_hybrid_model(
     #create input for images
     image_input = layers.Input(shape = image_shape, name = "image_input")
 
-    #Conv2D - searching simple shapes (32) -> 64 x 64 x 32 image, serching in 3x3 px, same size as befre 64x64
+    #Conv2D - searching simple shapes (32) -> 64 x 64 x 32 image
+    #searching in 3x3 px, same size as before 64x64
     x = layers.Conv2D(
         filters=32,
         kernel_size=(3, 3),
         activation="relu",
         padding="same",
     )(image_input)
+
     #take biggest value from 2x2px and change shape -> 32 x 32 x 32
     x = layers.MaxPooling2D(pool_size=(2, 2))(x)
 
@@ -83,9 +85,14 @@ def build_hybrid_model(
     z = layers.Dropout(0.2)(z)
 
     #final result layer
-    output = layers.Dense(num_classes, activation="linear", name="class_output",)(z)
+    output = layers.Dense(
+        num_classes,
+        activation="linear",
+        name="class_output",
+    )(z)
 
-    #Sequential - for simple, Model - for difficult for Functional API - Model(inputs=..., outputs=...)
+    #Sequential - for simple
+    #Model - for difficult for Functional API - Model(inputs=..., outputs=...)
     model = Model(
         inputs={
             "image_input": image_input,
