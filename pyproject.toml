@@ -44,3 +44,9 @@ select = [
     "F", # Pyflakes - real problems in Python-code
     "I", # imports
 ]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/handwriting"]
+check_untyped_defs = true
+warn_unused_ignores = true

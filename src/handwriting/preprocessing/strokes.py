@@ -1,25 +1,28 @@
 import json
 from pathlib import Path
+from typing import cast
 
 import numpy as np
+
+from handwriting.core.types import FloatArray, IntArray, StrokeData
 
 #~~~~~~~~~~~~~~~~~~
 #Load stroke JSON -> dict
 #~~~~~~~~~~~~~~~~~~
 
-def load_stroke_json(stroke_path: str | Path) -> dict:
+def load_stroke_json(stroke_path: str | Path) -> StrokeData:
     stroke_path = Path(stroke_path)
 
     with open(stroke_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    return data
+    return cast(StrokeData, data)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #Normalized strokes in range 0-1 in formate [num_points, 6]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def normalize_strokes (data: dict) -> np.array:
+def normalize_strokes (data: StrokeData) -> FloatArray:
 
     strokes = data.get("strokes", []) #if not - empty list
     
@@ -138,7 +141,7 @@ def normalize_strokes (data: dict) -> np.array:
 #Split sequence separate strokes
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def split_strokes(strokes: np.array) -> list[np.ndarray]:
+def split_strokes(strokes: FloatArray) -> list[FloatArray]:
 
     segments = []
     current_segment = []
@@ -165,7 +168,7 @@ def split_strokes(strokes: np.array) -> list[np.ndarray]:
 #~~~~~~~~~~~~~~~~~~~~~~~~
 
 #check lenght to set propotrion if every stroke in range 0~100
-def stroke_length(stroke: np.ndarray) -> float:
+def stroke_length(stroke: FloatArray) -> float:
 
     #if only one point = 1
     if len(stroke) < 2:
@@ -186,7 +189,10 @@ def stroke_length(stroke: np.ndarray) -> float:
 #Resample one stroke
 #~~~~~~~~~~~~~~~~~~~
 
-def resample_single_stroke(stroke: np.ndarray, target_points: int) -> np.ndarray:
+def resample_single_stroke(
+        stroke: FloatArray,
+        target_points: int,
+) -> FloatArray:
 
     #--------------------
     #if 0 target -> zeros
@@ -287,10 +293,10 @@ def resample_single_stroke(stroke: np.ndarray, target_points: int) -> np.ndarray
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def distribute_points_between_strokes(
-        segments: list[np.array],
+        segments: list[FloatArray],
         max_points: int,
         separator_points_per_gap: int = 2,
-) -> tuple[np.ndarray, int]:
+) -> tuple[IntArray, int]:
     
     #set all points(100) between each stroke with -2 points for gap
     #100 opints, 3 stroke, 2 gaps, separator points = 2 gaps*2 =4
@@ -310,7 +316,7 @@ def distribute_points_between_strokes(
 
     #if sepatarors take too much plase -> disable separators, take all points to stroke
     if num_segments > drawing_points:
-        points_per_segment = np.zeros(num_segments, dtype=np.float32)
+        points_per_segment = np.zeros(num_segments, dtype=np.int32)
         points_per_segment[:drawing_points] = 1
         return points_per_segment, separator_points_per_gap
     
@@ -350,7 +356,10 @@ def distribute_points_between_strokes(
 #Resample all strokes
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def resample_strokes(strokes: np.ndarray, max_points: int = 100) -> np.ndarray:
+def resample_strokes(
+        strokes: FloatArray,
+        max_points: int = 100,
+) -> FloatArray:
 
     #-------------------------
     #if no points return zeros (100, 6)
@@ -435,7 +444,10 @@ def resample_strokes(strokes: np.ndarray, max_points: int = 100) -> np.ndarray:
 #Main pipeline: json -> load data -> norm -> split by strokes -> resample -> complete
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def preprocess_strokes(stroke_path: str | Path, max_points: int = 100) -> np.ndarray:
+def preprocess_strokes(
+        stroke_path: str | Path,
+        max_points: int = 100,
+) -> FloatArray:
 
     data = load_stroke_json(stroke_path)
     normalized = normalize_strokes(data)

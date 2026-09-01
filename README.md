@@ -237,10 +237,10 @@ Pointer Events API
 * [x] Add model save/load test
 * [x] Create `pyproject.toml`
 * [x] Add Ruff
+* [x] Add typing
+* [x] Add Mypy
 * [ ] Move code into `src/handwriting`
 * [ ] Remove `sys.path.append`
-* [ ] Add typing
-* [ ] Add Mypy
 
 **Result:** existing behaviour is protected before refactoring.
 
