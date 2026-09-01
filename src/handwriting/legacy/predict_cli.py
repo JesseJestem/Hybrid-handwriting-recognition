@@ -1,12 +1,10 @@
-import argparse # allow run a file from the terminal with arguments (send path to img and stroke)
+import argparse  # allow run a file from the terminal with arguments (send path to img and stroke)
 from pathlib import Path
-import sys
-
-BASE_DIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(BASE_DIR))
 
 #import predictions def
-from src.inference.predictor import predict_from_files
+from handwriting.legacy.predictor import predict_from_files
+
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 #~~~~~~~~~~~~~~~~~~~~
 #main file runing (in CMD without rest API)
@@ -28,7 +26,8 @@ def main():
     )
 
     print("Prediction:", result["prediction"])
-    print("Confidence:", round(result["confidence"] * 100, 2), "%") #100 -> 0,94 to 94%, 2 - zeros after 0,00
+    # 100 -> 0,94 to 94%, 2 - zeros after 0,00
+    print("Confidence:", round(result["confidence"] * 100, 2), "%")
     print()
     print("Top predictions:")
 

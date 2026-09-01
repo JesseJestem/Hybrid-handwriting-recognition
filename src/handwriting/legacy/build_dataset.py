@@ -1,21 +1,22 @@
-from pathlib import Path
-import sys
 import json
+from pathlib import Path
+
 import numpy as np
 
-BASE_DIR = Path(__file__).resolve().parents[2] #Hybrid_handwriting_recognition/
-sys.path.append(str(BASE_DIR)) #to import files from src/
-
 #import preprocess function
-from src.preprocessing.image_preprocessing import preprocess_image
+from handwriting.legacy.image_preprocessing import preprocess_image
 from handwriting.preprocessing.strokes import preprocess_strokes
+
+BASE_DIR = Path(__file__).resolve().parents[2] #Hybrid_handwriting_recognition/
 
 IMAGE_DIR = BASE_DIR / "data" / "raw" / "images"
 STROKE_DIR = BASE_DIR / "data" / "raw" / "strokes"
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
 
-DATASET_PATH = PROCESSED_DIR / "dataset.npz" #save numpy arrays: X_images, X_strokes, y, class_names, display_labels
-METADATA_PATH = PROCESSED_DIR / "dataset_metadata.json" #metadata: img size, stroke points, sample num, classes name, wrong samples
+#save numpy arrays: X_images, X_strokes, y, class_names, display_labels
+DATASET_PATH = PROCESSED_DIR / "dataset.npz"
+#metadata: img size, stroke points, sample num, classes name, wrong samples
+METADATA_PATH = PROCESSED_DIR / "dataset_metadata.json"
 
 IMAGE_SIZE = 64
 MAX_POINTS = 100
@@ -69,7 +70,9 @@ def get_class_folders() -> list[str]:
     return image_classes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#take image + stroke and merge it to one dict in list: {"class_folder": "upper_A", "label": "A","class_index": 0,"image_path": "...png", "stroke_path": "...json"}
+#take image + stroke and merge it to one dict in list:
+#{"class_folder": "upper_A", "label": "A","class_index": 0,
+#"image_path": "...png", "stroke_path": "...json"}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def collect_sample_pairs(class_folders: list[str]) -> list[dict]:
@@ -86,7 +89,8 @@ def collect_sample_pairs(class_folders: list[str]) -> list[dict]:
 
         #search jsom for every image
         for image_path in image_files:
-            stroke_path = stroke_class_dir / f"{image_path.stem}.json" #take only file name: upper_A_20260525_120000_123456
+            # take only file name: upper_A_20260525_120000_123456
+            stroke_path = stroke_class_dir / f"{image_path.stem}.json"
 
             #skip file if stroke doesnt exists
             if not stroke_path.exists():

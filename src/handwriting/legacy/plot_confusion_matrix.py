@@ -1,14 +1,13 @@
-import sys
 from pathlib import Path
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 #~~~~~~~~~~~~~~~~~~~~~
 #Set path and dirs
 #~~~~~~~~~~~~~~~~~~~~~
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(BASE_DIR))
 
 DATASET_PATH = BASE_DIR / "data" / "processed" / "dataset.npz"
 CONFUSION_MATRIX_PATH =  BASE_DIR / "outputs" / "confusion_matrix.npy"

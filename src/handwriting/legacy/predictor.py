@@ -1,18 +1,17 @@
 from pathlib import Path
-import sys
+
 import numpy as np
 import tensorflow as tf
+
+#import project preprocess defs
+from handwriting.legacy.image_preprocessing import preprocess_image
+from handwriting.preprocessing.strokes import preprocess_strokes
 
 #~~~~~~~~~~~~~~~~~~~~~~~~
 #path
 #~~~~~~~~~~~~~~~~~~~~~~~~
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(BASE_DIR))
-
-#import project preprocess defs
-from src.preprocessing.image_preprocessing import preprocess_image
-from handwriting.preprocessing.strokes import preprocess_strokes
 
 #models paths
 MODEL_PATH = BASE_DIR / "saved_models" / "hybrid_letters.keras"
@@ -78,10 +77,12 @@ def predict_from_files(
         verbose=0, #print only result without 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 120ms/step and ets
     )
 
-    #turn logits to softmax, axis=1 use softmax to classes (1, 52), numpy() transform tf array to np, [0] (1, 52) -> (52,)
+    #turn logits to softmax, axis=1 use softmax to classes (1, 52)
+    #numpy() transform tf array to np, [0] (1, 52) -> (52,)
     probs = tf.nn.softmax(logits, axis=1).numpy()[0]
 
-    #take top indicates np.argsort(probs)[::-1] - take sorted probs(min->max) and revers it, [:top_k] take 3 of them for display
+    #take top indicates np.argsort(probs)[::-1]
+    # take sorted probs(min->max) and revers it, [:top_k] take 3 of them for display
     top_indices = np.argsort(probs)[::-1][:top_k]
 
     #add results from top classes

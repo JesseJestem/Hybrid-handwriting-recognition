@@ -8,7 +8,6 @@ import tempfile #temp files saving
 import traceback #display full error in backend console
 import base64
 import json
-import sys
 
 app = FastAPI()
 
@@ -37,8 +36,7 @@ IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 STROKE_DIR.mkdir(parents=True, exist_ok=True)
 
 #import prediction function
-sys.path.append(str(BASE_DIR))
-from src.inference.predictor import predict_from_files
+from handwriting.legacy.predictor import predict_from_files
 
 #temp files for prediction (outside)
 TEMP_DIR = Path(tempfile.gettempdir()) / "hybrid_handwriting_temp"

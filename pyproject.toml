@@ -37,6 +37,9 @@ where = ["src"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+exclude = [
+    "src/handwriting/legacy",
+]
 
 [tool.ruff.lint]
 select = [
@@ -50,3 +53,6 @@ python_version = "3.11"
 files = ["src/handwriting"]
 check_untyped_defs = true
 warn_unused_ignores = true
+exclude = [
+    "src/handwriting/legacy/",
+]
