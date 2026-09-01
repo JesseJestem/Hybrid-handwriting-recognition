@@ -1,4 +1,4 @@
-from tensorflow.keras import Model, layers
+from tensorflow.keras import Model, layers  # type: ignore[import-untyped]
 
 
 def build_hybrid_model(

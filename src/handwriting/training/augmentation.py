@@ -320,14 +320,14 @@ def augment_training_data(
             augmented_labels.append(label)
 
     #transform list to np array
-    augmented_images = np.array(augmented_images, dtype=np.float32)
-    augmented_strokes = np.array(augmented_strokes, dtype=np.float32)
-    augmented_labels = np.array(augmented_labels, dtype=y_train.dtype)
+    augmented_images_array = np.array(augmented_images, dtype=np.float32)
+    augmented_strokes_array = np.array(augmented_strokes, dtype=np.float32)
+    augmented_labels_array = np.array(augmented_labels, dtype=y_train.dtype)
 
     #add new augmented data to originals
-    images_list.append(augmented_images)
-    strokes_list.append(augmented_strokes)
-    labels_list.append(augmented_labels)
+    images_list.append(augmented_images_array)
+    strokes_list.append(augmented_strokes_array)
+    labels_list.append(augmented_labels_array)
 
     #add data to training set to the bottom, along the num of samples
     X_train_images_aug = np.concatenate(images_list, axis=0)
