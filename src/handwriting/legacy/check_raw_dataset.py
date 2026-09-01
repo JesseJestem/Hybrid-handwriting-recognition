@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-BASE_DIR = Path(__file__). resolve().parents[2]
+BASE_DIR = Path(__file__). resolve().parents[3]
 IMAGE_DIR = BASE_DIR / "data" / "raw" / "images"
 STROKE_DIR = BASE_DIR / "data" / "raw" / "strokes"
 

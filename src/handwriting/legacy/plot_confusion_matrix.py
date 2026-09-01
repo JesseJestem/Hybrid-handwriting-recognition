@@ -7,7 +7,7 @@ import numpy as np
 #Set path and dirs
 #~~~~~~~~~~~~~~~~~~~~~
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[3]
 
 DATASET_PATH = BASE_DIR / "data" / "processed" / "dataset.npz"
 CONFUSION_MATRIX_PATH =  BASE_DIR / "outputs" / "confusion_matrix.npy"

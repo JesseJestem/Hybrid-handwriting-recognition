@@ -11,13 +11,13 @@ from handwriting.preprocessing.strokes import preprocess_strokes
 #path
 #~~~~~~~~~~~~~~~~~~~~~~~~
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[3]
 
 #models paths
 MODEL_PATH = BASE_DIR / "saved_models" / "hybrid_letters.keras"
 DATASET_PATH = BASE_DIR / "data" / "processed" / "dataset.npz"
 
-#global variabels
+#global variables
 _model = None
 _display_labels = None
 
@@ -26,7 +26,7 @@ _display_labels = None
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def load_prediction_resources():
-    #global variabels loading for the first time and reuse it
+    #global variables loading for the first time and reuse it
     global _model, _display_labels
 
     #checking and loading model
