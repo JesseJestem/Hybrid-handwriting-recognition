@@ -1,5 +1,6 @@
-from pathlib import Path
 import json
+from pathlib import Path
+
 import numpy as np
 
 #~~~~~~~~~~~~~~~~~~
@@ -26,11 +27,26 @@ def normalize_strokes (data: dict) -> np.array:
         return np.zeros((0, 6), dtype=np.float32) #emtpy list - zeros
     
     #take stroke data and convert it into np.array
-    x_values = np.array([p["x"] for p in strokes], dtype=np.float32)
-    y_values = np.array([p["y"] for p in strokes], dtype=np.float32)
-    t_values = np.array([p["t"] for p in strokes], dtype=np.float32)
-    pressure_values = np.array([p.get("pressure", 0.5) for p in strokes], dtype=np.float32)
-    pen_down_values = np.array([1.0 if p.get("pen_down", True) else 0.0 for p in strokes], dtype=np.float32)
+    x_values = np.array(
+        [p["x"] for p in strokes],
+        dtype=np.float32,
+    )
+    y_values = np.array(
+        [p["y"] for p in strokes],
+        dtype=np.float32,
+    )
+    t_values = np.array(
+        [p["t"] for p in strokes],
+        dtype=np.float32,
+    )
+    pressure_values = np.array(
+        [p.get("pressure", 0.5) for p in strokes],
+        dtype=np.float32,
+    )
+    pen_down_values = np.array(
+        [1.0 if p.get("pen_down", True) else 0.0 for p in strokes],
+        dtype=np.float32,
+    )
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #Add aditional stroke start feature
@@ -39,7 +55,9 @@ def normalize_strokes (data: dict) -> np.array:
     stroke_start_values = np.zeros_like(pen_down_values)
     previous_pen_down = 0.0
 
-    #separate each stroke by pen_down -> stroke_start pen_down:[1, 1, 1, 0, 1, 1] -> stroke_start:[1, 0, 0, 0, 1, 0]
+    # Detect the beginning of each stroke
+    # pen_down:    [1, 1, 1, 0, 1, 1]
+    # stroke_start:[1, 0, 0, 0, 1, 0]
     for i, pen_down in enumerate(pen_down_values):
         if pen_down == 1.0 and previous_pen_down == 0.0:
             stroke_start_values[i] = 1.0
@@ -372,7 +390,8 @@ def resample_strokes(strokes: np.ndarray, max_points: int = 100) -> np.ndarray:
         result_parts.append(resampled_segment)
 
         #----------------------
-        #checking if need to add separator points between strokes (but not last one and we have separators point)
+        #checking if need to add separator points between strokes
+        #(but not last one and we have separators point)
         if segment_index < len(segments) - 1 and separator_points_per_gap > 0:
             current_end = resampled_segment[-1].copy()
             next_start = segments[segment_index + 1][0].copy() #take first point of last segment

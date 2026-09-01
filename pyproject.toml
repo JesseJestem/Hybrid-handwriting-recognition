@@ -33,3 +33,14 @@ python_files = ["test_*.py"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E", # basic style/errors
+    "F", # Pyflakes - real problems in Python-code
+    "I", # imports
+]

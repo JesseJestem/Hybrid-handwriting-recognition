@@ -46,7 +46,13 @@ def shift_image_no_wrap(image: np.ndarray, dx: int, dy: int) -> np.ndarray:
     #--------------
     #maint shift
     if src_x_end > src_x_start and src_y_end > src_y_start:
-        shifted[dst_y_start:dst_y_end, dst_x_start:dst_x_end] = image[src_y_start:src_y_end, src_x_start:src_x_end]
+        shifted[
+            dst_y_start:dst_y_end,
+            dst_x_start:dst_x_end,
+        ] = image[
+            src_y_start:src_y_end,
+            src_x_start:src_x_end,
+        ]
 
     return shifted
 
@@ -342,6 +348,7 @@ def augment_training_data(
 
 if __name__ == "__main__":
     from pathlib import Path
+
     import matplotlib.pyplot as plt
 
     BASE_DIR = Path(__file__).resolve().parents[2]
