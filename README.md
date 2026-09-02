@@ -248,8 +248,8 @@ Pointer Events API
 
 ## Stage 2 — Core Architecture
 
-* [ ] Centralize project paths
-* [ ] Add centralized application configuration
+* [x] Centralize project paths
+* [x] Add centralized application configuration
 * [ ] Audit and extend domain types
 * [ ] Add domain exceptions
 * [ ] Add training configuration
