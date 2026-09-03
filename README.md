@@ -250,7 +250,7 @@ Pointer Events API
 
 * [x] Centralize project paths
 * [x] Add centralized application configuration
-* [ ] Audit and extend domain types
+* [x] Audit and extend domain types
 * [ ] Add domain exceptions
 * [ ] Add training configuration
 * [ ] Add structured logging infrastructure
