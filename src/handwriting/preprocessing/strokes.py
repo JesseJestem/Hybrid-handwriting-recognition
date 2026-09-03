@@ -4,6 +4,7 @@ from typing import cast
 
 import numpy as np
 
+from handwriting.core.exceptions import StrokeDataError
 from handwriting.core.types import IntArray, StrokeArray, StrokeData
 
 #~~~~~~~~~~~~~~~~~~
@@ -13,8 +14,19 @@ from handwriting.core.types import IntArray, StrokeArray, StrokeData
 def load_stroke_json(stroke_path: str | Path) -> StrokeData:
     stroke_path = Path(stroke_path)
 
-    with open(stroke_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    try:
+        with open(stroke_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+    except FileNotFoundError as exc:
+        raise StrokeDataError(
+            f"Stroke file not found: {stroke_path}"
+        ) from exc
+
+    except json.JSONDecodeError as exc:
+        raise StrokeDataError(
+            f"Invalid stroke JSON: {stroke_path}"
+        ) from exc
 
     return cast(StrokeData, data)
 
