@@ -4,7 +4,7 @@ from typing import cast
 
 import numpy as np
 
-from handwriting.core.types import FloatArray, IntArray, StrokeData
+from handwriting.core.types import IntArray, StrokeArray, StrokeData
 
 #~~~~~~~~~~~~~~~~~~
 #Load stroke JSON -> dict
@@ -22,7 +22,7 @@ def load_stroke_json(stroke_path: str | Path) -> StrokeData:
 #Normalized strokes in range 0-1 in formate [num_points, 6]
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def normalize_strokes (data: StrokeData) -> FloatArray:
+def normalize_strokes (data: StrokeData) -> StrokeArray:
 
     strokes = data.get("strokes", []) #if not - empty list
     
@@ -141,7 +141,7 @@ def normalize_strokes (data: StrokeData) -> FloatArray:
 #Split sequence separate strokes
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def split_strokes(strokes: FloatArray) -> list[FloatArray]:
+def split_strokes(strokes: StrokeArray) -> list[StrokeArray]:
 
     segments = []
     current_segment = []
@@ -168,7 +168,7 @@ def split_strokes(strokes: FloatArray) -> list[FloatArray]:
 #~~~~~~~~~~~~~~~~~~~~~~~~
 
 #check lenght to set propotrion if every stroke in range 0~100
-def stroke_length(stroke: FloatArray) -> float:
+def stroke_length(stroke: StrokeArray) -> float:
 
     #if only one point = 1
     if len(stroke) < 2:
@@ -190,9 +190,9 @@ def stroke_length(stroke: FloatArray) -> float:
 #~~~~~~~~~~~~~~~~~~~
 
 def resample_single_stroke(
-        stroke: FloatArray,
+        stroke: StrokeArray,
         target_points: int,
-) -> FloatArray:
+) -> StrokeArray:
 
     #--------------------
     #if 0 target -> zeros
@@ -293,7 +293,7 @@ def resample_single_stroke(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def distribute_points_between_strokes(
-        segments: list[FloatArray],
+        segments: list[StrokeArray],
         max_points: int,
         separator_points_per_gap: int = 2,
 ) -> tuple[IntArray, int]:
@@ -357,9 +357,9 @@ def distribute_points_between_strokes(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def resample_strokes(
-        strokes: FloatArray,
+        strokes: StrokeArray,
         max_points: int = 100,
-) -> FloatArray:
+) -> StrokeArray:
 
     #-------------------------
     #if no points return zeros (100, 6)
@@ -447,7 +447,7 @@ def resample_strokes(
 def preprocess_strokes(
         stroke_path: str | Path,
         max_points: int = 100,
-) -> FloatArray:
+) -> StrokeArray:
 
     data = load_stroke_json(stroke_path)
     normalized = normalize_strokes(data)
